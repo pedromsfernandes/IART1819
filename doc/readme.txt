@@ -1,0 +1,5 @@
+Compilar
+
+Executar
+
+Jogar
