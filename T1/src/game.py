@@ -35,6 +35,11 @@ class BloxorzGame(object):
             for j in range(len(self.start_puzzle[0])):
                 self.puzzle[i].append(self.start_puzzle[i][j])
 
+    def toggleCells(self):
+        for line in self.puzzle:
+            for cell in line:
+                if cell == "F":
+                    cell = "A"
 
 def readLevel(levelId):
     file = open("../res/levels/level" + str(levelId) + ".txt", "r")
