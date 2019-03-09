@@ -120,17 +120,25 @@ class BloxorzUI(tk.Frame):
         numColumns = len(self.game.puzzle[0])
 
         self.canvas = tk.Canvas(self,
-                                width= MARGIN * 2 + SIDE * numColumns,
-                                height= MARGIN * 2 + SIDE * numLines)
+                                width=MARGIN * 2 + SIDE * numColumns,
+                                height=MARGIN * 2 + SIDE * numLines)
         self.canvas.pack(fill=tk.BOTH, side=tk.TOP)
 
         self.__draw_grid()
 
-        tk.Button(self, text="Exit", command=lambda: controller.show_frame(MainMenu)).pack()
+        tk.Button(self, text="Exit",
+                  command=lambda: controller.show_frame(MainMenu)).pack()
         # self.__draw_puzzle()
 
-        # self.canvas.bind("<Button-1>", self.__cell_clicked)
-        # self.canvas.bind("<Key>", self.__key_pressed)
+        self.canvas.bind("<Key>", self.key)
+        self.canvas.bind("<Button-1>", self.callback)
+
+    def key(self, event):
+        print ("pressed", repr(event.char))
+
+    def callback(self, event):
+        self.canvas.focus_set()
+        print ("clicked at", event.x, event.y)
 
     def __draw_grid(self):
         numLines = len(self.game.puzzle)
