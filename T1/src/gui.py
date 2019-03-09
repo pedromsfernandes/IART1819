@@ -17,7 +17,10 @@ class BloxorzUI(Frame):
             "V": "blue",
             "H": "blue",
             "O": "red",
-            "E": "white"
+            "E": "white",
+            "F": "white",
+            "A": "green",
+            "T": "orange"
         }
 
         self.__initUI()
