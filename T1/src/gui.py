@@ -133,12 +133,17 @@ class BloxorzUI(tk.Frame):
         self.canvas.bind("<Key>", self.key)
         self.canvas.bind("<Button-1>", self.callback)
 
+    def validMove(self, initState, afterState):
+        print("todo")
+
     def key(self, event):
-        print ("pressed", repr(event.char))
+        print("pressed", repr(event.char))
+        self.game.move(event.char)
+        self.__draw_grid()
 
     def callback(self, event):
         self.canvas.focus_set()
-        print ("clicked at", event.x, event.y)
+        print("clicked at", event.x, event.y)
 
     def __draw_grid(self):
         numLines = len(self.game.puzzle)
