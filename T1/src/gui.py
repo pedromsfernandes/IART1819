@@ -104,13 +104,9 @@ class BloxorzUI(tk.Frame):
         self.row, self.col = 0, 0
         self.colors = {
             "X": "gray",
-            "V": "blue",
-            "H": "blue",
             "O": "red",
             "E": "white",
-            "F": "white",
             "A": "green",
-            "T": "orange"
         }
 
         self.__initUI(controller)
@@ -155,8 +151,18 @@ class BloxorzUI(tk.Frame):
             for j in range(numColumns):
                 x1 = x0 + SIDE
                 y1 = y0 + SIDE
+
+                color = ""
+                if self.game.puzzle[i][j] in self.colors:
+                    color = self.colors[self.game.puzzle[i][j]]
+                elif self.game.puzzle[i][j].isupper():
+                    color = "orange"
+                else:
+                    color = "white"
+
                 self.canvas.create_rectangle(
-                    x0, y0, x1, y1, fill=self.colors[self.game.puzzle[i][j]])
+                        x0, y0, x1, y1, fill=color)
+
                 x0 += SIDE
             x0 = MARGIN
             y0 += SIDE

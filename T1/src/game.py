@@ -27,6 +27,8 @@ class BloxorzGame(object):
         self.board_file = board_file
         self.start_puzzle = BloxorzBoard(board_file).board
 
+        self.reservedLetters = ["X", "E", "O", "A"]
+
         self.keyEvents = {
             "i": self.moveUp,
             "k": self.moveDown,
@@ -59,14 +61,18 @@ class BloxorzGame(object):
         return self.validators[direction]()
 
     def move(self, direction):
-        print(self.blockCoords)
         if self.validateMove(direction):
             self.keyEvents[direction]()
             if self.testSolution():
                 print('found solution!')
 
-        if self.puzzle[self.blockCoords[0]][self.blockCoords[1]] == "T" or self.puzzle[self.blockCoords[2]][self.blockCoords[3]] == "T":
-            self.toggleCells()
+        block1 = self.puzzle[self.blockCoords[0]][self.blockCoords[1]]
+        block2 = self.puzzle[self.blockCoords[2]][self.blockCoords[3]]
+
+        if block1.isupper() and block1 not in self.reservedLetters:
+            self.toggleCells(block1)
+        elif block2.isupper() and block2 not in self.reservedLetters:
+            self.toggleCells(block2)
 
     def validateUp(self):
         if self.blockCoords[4] == "V":
@@ -82,8 +88,9 @@ class BloxorzGame(object):
         return False
 
     def isValid(self, i0, j0, i1, j1):
-        invalid = ['E', 'F']
-        return self.puzzle[self.blockCoords[0] + i0][self.blockCoords[1] + j0] not in invalid and self.puzzle[self.blockCoords[2] + i1][self.blockCoords[3] + j1] not in invalid
+        piece1 = self.puzzle[self.blockCoords[0] + i0][self.blockCoords[1] + j0]
+        piece2 = self.puzzle[self.blockCoords[2] + i1][self.blockCoords[3] + j1]
+        return piece1 != "E" and piece2 != "E" and not piece1.islower() and not piece2.islower()
 
     def validateDown(self):
         length = len(self.puzzle)
@@ -182,10 +189,10 @@ class BloxorzGame(object):
                 self.blockCoords[1] += 1
                 self.blockCoords[3] += 1
 
-    def toggleCells(self):
+    def toggleCells(self, letter):
         for i in range(len(self.puzzle)):
             for j in range(len(self.puzzle[0])):
-                if self.puzzle[i][j] == "F":
+                if self.puzzle[i][j] == letter.lower():
                     self.puzzle[i][j] = "A"
 
     def testSolution(self):
