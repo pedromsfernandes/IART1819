@@ -9,7 +9,6 @@ SIDE = 50  # Width of every board cell.
 WIDTH = HEIGHT = MARGIN * 2 + SIDE * 9  # Width and height of the whole board
 levelInt = 1
 
-
 def nextCallback(level, numLevels):
     global levelInt
     if levelInt < numLevels:
@@ -99,6 +98,9 @@ class BloxorzUI(tk.Frame):
         self.game = game
         self.controller = controller
         self.parent = parent
+
+        self.algorithms = ["BFS", "DFS", "A*", "IDDFS", "UCS"]
+        self.i = 0
         tk.Frame.__init__(self, parent)
 
         self.row, self.col = 0, 0
@@ -111,9 +113,26 @@ class BloxorzUI(tk.Frame):
 
         self.__initUI(controller)
 
+    def prevCallback(self, algorithm):
+        if self.i > 0:
+            self.i -= 1
+        else:
+            self.i = len(self.algorithms) - 1
+        algorithm.set(self.algorithms[self.i])
+
+    def nextCallback(self, algorithm):
+        if self.i < len(self.algorithms) - 1:
+            self.i += 1
+        else:
+            self.i = 0
+        algorithm.set(self.algorithms[self.i])
+
     def __initUI(self, controller):
         numLines = len(self.game.puzzle)
         numColumns = len(self.game.puzzle[0])
+
+        algorithm = tk.StringVar()
+        algorithm.set(self.algorithms[self.i])
 
         self.canvas = tk.Canvas(self,
                                 width=MARGIN * 2 + SIDE * numColumns,
@@ -122,9 +141,16 @@ class BloxorzUI(tk.Frame):
 
         self.__draw_grid()
 
+        tk.Button(self, text="Solve").pack()
+        tk.Button(self, text="Get a tip").pack()
+
+        tk.Label(self, textvariable=algorithm).pack()
+        tk.Button(self, text="Previous",
+                  command=lambda: self.prevCallback(algorithm)).pack()
+        tk.Button(self, text="Next", command=lambda: self.nextCallback(algorithm)).pack()
+
         tk.Button(self, text="Exit",
                   command=lambda: controller.show_frame(MainMenu)).pack()
-        # self.__draw_puzzle()
 
         self.canvas.bind("<Key>", self.key)
         self.canvas.bind("<Button-1>", self.callback)
@@ -161,7 +187,7 @@ class BloxorzUI(tk.Frame):
                     color = "white"
 
                 self.canvas.create_rectangle(
-                        x0, y0, x1, y1, fill=color)
+                    x0, y0, x1, y1, fill=color)
 
                 x0 += SIDE
             x0 = MARGIN
@@ -171,10 +197,10 @@ class BloxorzUI(tk.Frame):
         y0 = MARGIN + SIDE * self.game.blockCoords[0]
 
         self.canvas.create_rectangle(
-                   x0, y0, x0 + SIDE, y0 + SIDE, fill="blue")
+            x0, y0, x0 + SIDE, y0 + SIDE, fill="blue")
 
         x0 = MARGIN + SIDE * self.game.blockCoords[3]
         y0 = MARGIN + SIDE * self.game.blockCoords[2]
 
         self.canvas.create_rectangle(
-                   x0, y0, x0 + SIDE, y0 + SIDE, fill="blue")
+            x0, y0, x0 + SIDE, y0 + SIDE, fill="blue")
