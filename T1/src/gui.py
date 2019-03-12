@@ -160,3 +160,15 @@ class BloxorzUI(tk.Frame):
                 x0 += SIDE
             x0 = MARGIN
             y0 += SIDE
+
+        x0 = MARGIN + SIDE * self.game.blockCoords[1]
+        y0 = MARGIN + SIDE * self.game.blockCoords[0]
+
+        self.canvas.create_rectangle(
+                   x0, y0, x0 + SIDE, y0 + SIDE, fill="blue")
+
+        x0 = MARGIN + SIDE * self.game.blockCoords[3]
+        y0 = MARGIN + SIDE * self.game.blockCoords[2]
+
+        self.canvas.create_rectangle(
+                   x0, y0, x0 + SIDE, y0 + SIDE, fill="blue")

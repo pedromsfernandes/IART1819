@@ -49,6 +49,8 @@ class BloxorzGame(object):
             for j in range(len(self.start_puzzle[0])):
                 if self.start_puzzle[i][j] == "V":
                     self.blockCoords = [i, j, i, j, "V"]
+                    self.puzzle[i].append("X")
+                    continue
                 elif self.start_puzzle[i][j] == "O":
                     self.solutionCoords = [i, j]
                 self.puzzle[i].append(self.start_puzzle[i][j])
@@ -57,63 +59,55 @@ class BloxorzGame(object):
         return self.validators[direction]()
 
     def move(self, direction):
+        print(self.blockCoords)
         if self.validateMove(direction):
             self.keyEvents[direction]()
             if self.testSolution():
-                print('oi')
+                print('found solution!')
+
+        if self.puzzle[self.blockCoords[0]][self.blockCoords[1]] == "T" or self.puzzle[self.blockCoords[2]][self.blockCoords[3]] == "T":
+            self.toggleCells()
 
     def validateUp(self):
         if self.blockCoords[4] == "V":
-            if self.blockCoords[0] - 2 >= 0 and self.puzzle[self.blockCoords[0] - 2
-                                                            ][self.blockCoords[1]] != "E" and self.puzzle[self.blockCoords[2] - 1
-                                                                                                          ][self.blockCoords[3]] != "E":
+            if self.blockCoords[0] - 2 >= 0 and self.isValid(-2, 0, -1, 0):
                 return True
         elif self.blockCoords[0] == self.blockCoords[2]:
-            if self.blockCoords[0] - 1 >= 0 and self.puzzle[self.blockCoords[0] - 1
-                                                            ][self.blockCoords[1]] != "E" and self.puzzle[self.blockCoords[2] - 1
-                                                                                                          ][self.blockCoords[3]] != "E":
+            if self.blockCoords[0] - 1 >= 0 and self.isValid(-1, 0, -1, 0):
                 return True
         else:
-            if self.blockCoords[0] - 1 >= 0 and self.puzzle[self.blockCoords[0] - 1
-                                                            ][self.blockCoords[1]] != "E":
+            if self.blockCoords[0] - 1 >= 0 and self.puzzle[self.blockCoords[0] - 1][self.blockCoords[1]] != "E" and self.puzzle[self.blockCoords[0] - 1][self.blockCoords[1]] != "F":
                 return True
 
         return False
 
+    def isValid(self, i0, j0, i1, j1):
+        invalid = ['E', 'F']
+        return self.puzzle[self.blockCoords[0] + i0][self.blockCoords[1] + j0] not in invalid and self.puzzle[self.blockCoords[2] + i1][self.blockCoords[3] + j1] not in invalid
+
     def validateDown(self):
         length = len(self.puzzle)
-        print(self.blockCoords)
         if self.blockCoords[4] == "V":
-            if self.blockCoords[0] + 2 < length and self.puzzle[self.blockCoords[0] + 2
-                                                                 ][self.blockCoords[1]] != "E" and self.puzzle[self.blockCoords[2] + 1
-                                                                                                               ][self.blockCoords[3]] != "E":
+            if self.blockCoords[0] + 2 < length and self.isValid(2, 0, 1, 0):
                 return True
         elif self.blockCoords[0] == self.blockCoords[2]:
-            if self.blockCoords[0] + 1 < length and self.puzzle[self.blockCoords[0] + 1
-                                                                 ][self.blockCoords[1]] != "E" and self.puzzle[self.blockCoords[2] + 1
-                                                                                                               ][self.blockCoords[3]] != "E":
+            if self.blockCoords[0] + 1 < length and self.isValid(1, 0, 1, 0):
                 return True
         else:
-            if self.blockCoords[0] + 1 < length and self.puzzle[self.blockCoords[0] + 2
-                                                                 ][self.blockCoords[1]] != "E":
+            if self.blockCoords[0] + 1 < length and self.puzzle[self.blockCoords[0] + 2][self.blockCoords[1]] != "E" and self.puzzle[self.blockCoords[0] + 2][self.blockCoords[1]] != "F":
                 return True
 
         return False
 
     def validateLeft(self):
         if self.blockCoords[4] == "V":
-            if self.blockCoords[1] - 2 >= 0 and self.puzzle[self.blockCoords[0]
-                                                            ][self.blockCoords[1] - 2] != "E" and self.puzzle[self.blockCoords[2]
-                                                                                                              ][self.blockCoords[3] - 1] != "E":
+            if self.blockCoords[1] - 2 >= 0 and self.isValid(0, -2, 0, -1):
                 return True
         elif self.blockCoords[0] == self.blockCoords[2]:
-            if self.blockCoords[1] - 1 >= 0 and self.puzzle[self.blockCoords[0]
-                                                            ][self.blockCoords[1] - 1] != "E":
+            if self.blockCoords[1] - 1 >= 0 and self.puzzle[self.blockCoords[0]][self.blockCoords[1] - 1] != "E" and self.puzzle[self.blockCoords[0]][self.blockCoords[1] - 1] != "F":
                 return True
         else:
-            if self.blockCoords[1] - 1 >= 0 and self.puzzle[self.blockCoords[0]
-                                                            ][self.blockCoords[1] - 1] != "E" and self.puzzle[self.blockCoords[2]
-                                                                                                              ][self.blockCoords[3] - 1] != "E":
+            if self.blockCoords[1] - 1 >= 0 and self.isValid(0, -1, 0, -1):
                 return True
 
         return False
@@ -121,18 +115,13 @@ class BloxorzGame(object):
     def validateRight(self):
         length = len(self.puzzle[0])
         if self.blockCoords[4] == "V":
-            if self.blockCoords[3] + 2 < length and self.puzzle[self.blockCoords[0]
-                                                                 ][self.blockCoords[1] + 1] != "E" and self.puzzle[self.blockCoords[2]
-                                                                                                                   ][self.blockCoords[3] + 2] != "E":
+            if self.blockCoords[3] + 2 < length and self.isValid(0, 1, 0, 2):
                 return True
         elif self.blockCoords[0] == self.blockCoords[2]:
-            if self.blockCoords[3] + 1 < length and self.puzzle[self.blockCoords[0]
-                                                                 ][self.blockCoords[1] + 2] != "E":
+            if self.blockCoords[3] + 1 < length and self.puzzle[self.blockCoords[0]][self.blockCoords[1] + 2] != "E" and self.puzzle[self.blockCoords[0]][self.blockCoords[1] + 2] != "F":
                 return True
         else:
-            if self.blockCoords[3] + 1 < length and self.puzzle[self.blockCoords[0]
-                                                                 ][self.blockCoords[1] + 1] != "E" and self.puzzle[self.blockCoords[2]
-                                                                                                                   ][self.blockCoords[3] + 1] != "E":
+            if self.blockCoords[3] + 1 < length and self.isValid(0, 1, 0, 1):
                 return True
 
         return False
@@ -142,140 +131,62 @@ class BloxorzGame(object):
             self.blockCoords[0] -= 2
             self.blockCoords[2] -= 1
             self.blockCoords[4] = "H"
-            self.puzzle[self.blockCoords[0]
-                        ][self.blockCoords[1]] = "H"
-            self.puzzle[self.blockCoords[2]
-                        ][self.blockCoords[3]] = "H"
-            self.puzzle[self.blockCoords[2] +
-                        1][self.blockCoords[3]] = "X"
         elif self.blockCoords[4] == "H":
             if self.blockCoords[0] == self.blockCoords[2]:
                 self.blockCoords[0] -= 1
                 self.blockCoords[2] -= 1
-                self.puzzle[self.blockCoords[0]
-                            ][self.blockCoords[1]] = "H"
-                self.puzzle[self.blockCoords[2]
-                            ][self.blockCoords[3]] = "H"
-                self.puzzle[self.blockCoords[0] +
-                            1][self.blockCoords[1]] = "X"
-                self.puzzle[self.blockCoords[2] +
-                            1][self.blockCoords[3]] = "X"
             else:
                 self.blockCoords[0] -= 1
                 self.blockCoords[2] -= 2
                 self.blockCoords[4] = "V"
-                self.puzzle[self.blockCoords[0]
-                            ][self.blockCoords[1]] = "V"
-                self.puzzle[self.blockCoords[2]
-                            ][self.blockCoords[3]] = "V"
-                self.puzzle[self.blockCoords[0] +
-                            1][self.blockCoords[1]] = "X"
-                self.puzzle[self.blockCoords[2] +
-                            2][self.blockCoords[3]] = "X"
 
     def moveDown(self):
         if self.blockCoords[4] == "V":
             self.blockCoords[0] += 1
             self.blockCoords[2] += 2
             self.blockCoords[4] = "H"
-            self.puzzle[self.blockCoords[0]
-                        ][self.blockCoords[1]] = "H"
-            self.puzzle[self.blockCoords[2]
-                        ][self.blockCoords[3]] = "H"
-            self.puzzle[self.blockCoords[2] -
-                        2][self.blockCoords[3]] = "X"
         elif self.blockCoords[4] == "H":
             if self.blockCoords[0] == self.blockCoords[2]:
                 self.blockCoords[0] += 1
                 self.blockCoords[2] += 1
-                self.puzzle[self.blockCoords[0]
-                            ][self.blockCoords[1]] = "H"
-                self.puzzle[self.blockCoords[2]
-                            ][self.blockCoords[3]] = "H"
-                self.puzzle[self.blockCoords[0] -
-                            1][self.blockCoords[1]] = "X"
-                self.puzzle[self.blockCoords[2] -
-                            1][self.blockCoords[3]] = "X"
             else:
                 self.blockCoords[0] += 2
                 self.blockCoords[2] += 1
                 self.blockCoords[4] = "V"
-                self.puzzle[self.blockCoords[0]
-                            ][self.blockCoords[1]] = "V"
-                self.puzzle[self.blockCoords[0] -
-                            2][self.blockCoords[1]] = "X"
-                self.puzzle[self.blockCoords[2] -
-                            1][self.blockCoords[3]] = "X"
 
     def moveLeft(self):
         if self.blockCoords[4] == "V":
             self.blockCoords[1] -= 2
             self.blockCoords[3] -= 1
             self.blockCoords[4] = "H"
-            self.puzzle[self.blockCoords[0]
-                        ][self.blockCoords[1]] = "H"
-            self.puzzle[self.blockCoords[2]
-                        ][self.blockCoords[3]] = "H"
-            self.puzzle[self.blockCoords[2]
-                        ][self.blockCoords[3] + 1] = "X"
         elif self.blockCoords[4] == "H":
             if self.blockCoords[0] == self.blockCoords[2]:
                 self.blockCoords[1] -= 1
                 self.blockCoords[3] -= 2
                 self.blockCoords[4] = "V"
-                self.puzzle[self.blockCoords[0]
-                            ][self.blockCoords[1]] = "V"
-                self.puzzle[self.blockCoords[0]
-                            ][self.blockCoords[1]+2] = "X"
-                self.puzzle[self.blockCoords[2]
-                            ][self.blockCoords[3]+1] = "X"
             else:
                 self.blockCoords[1] -= 1
                 self.blockCoords[3] -= 1
-                self.puzzle[self.blockCoords[0]
-                            ][self.blockCoords[1]] = "H"
-                self.puzzle[self.blockCoords[2]
-                            ][self.blockCoords[3]] = "H"
-                self.puzzle[self.blockCoords[0]][self.blockCoords[1] + 1] = "X"
-                self.puzzle[self.blockCoords[2]][self.blockCoords[3] + 1] = "X"
 
     def moveRight(self):
         if self.blockCoords[4] == "V":
             self.blockCoords[1] += 1
             self.blockCoords[3] += 2
             self.blockCoords[4] = "H"
-            self.puzzle[self.blockCoords[0]
-                        ][self.blockCoords[1]] = "H"
-            self.puzzle[self.blockCoords[2]
-                        ][self.blockCoords[3]] = "H"
-            self.puzzle[self.blockCoords[2]
-                        ][self.blockCoords[1] - 1] = "X"
         elif self.blockCoords[4] == "H":
             if self.blockCoords[0] == self.blockCoords[2]:
                 self.blockCoords[1] += 2
                 self.blockCoords[3] += 1
                 self.blockCoords[4] = "V"
-                self.puzzle[self.blockCoords[0]
-                            ][self.blockCoords[1]] = "V"
-                self.puzzle[self.blockCoords[0]
-                            ][self.blockCoords[1]-2] = "X"
-                self.puzzle[self.blockCoords[2]
-                            ][self.blockCoords[3]-1] = "X"
             else:
                 self.blockCoords[1] += 1
                 self.blockCoords[3] += 1
-                self.puzzle[self.blockCoords[0]
-                            ][self.blockCoords[1]] = "H"
-                self.puzzle[self.blockCoords[2]
-                            ][self.blockCoords[3]] = "H"
-                self.puzzle[self.blockCoords[0]][self.blockCoords[1] - 1] = "X"
-                self.puzzle[self.blockCoords[2]][self.blockCoords[3] - 1] = "X"
 
     def toggleCells(self):
-        for line in self.puzzle:
-            for cell in line:
-                if cell == "F":
-                    cell = "A"
+        for i in range(len(self.puzzle)):
+            for j in range(len(self.puzzle[0])):
+                if self.puzzle[i][j] == "F":
+                    self.puzzle[i][j] = "A"
 
     def testSolution(self):
         return True if self.blockCoords[4] == "V" and self.blockCoords[0] == self.solutionCoords[0] and self.blockCoords[1] == self.solutionCoords[1] else False
