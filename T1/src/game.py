@@ -78,8 +78,10 @@ class BloxorzGame(object):
         block2 = self.puzzle[self.blockCoords[2]][self.blockCoords[3]]
 
         if block1.isupper() and block1 not in self.reservedLetters:
+            print("ya")
             self.toggleCells(block1)
         elif block2.isupper() and block2 not in self.reservedLetters:
+            print("ya")
             self.toggleCells(block2)
 
         return self.numMovements
@@ -101,9 +103,17 @@ class BloxorzGame(object):
         piece1 = self.puzzle[self.blockCoords[0] + i0][self.blockCoords[1] + j0]
         piece2 = self.puzzle[self.blockCoords[2] + i1][self.blockCoords[3] + j1]
 
-        if piece1 in self.togglers and piece2 in self.togglers:
-            return self.togglers[piece1] and self.togglers[piece2]
+        if piece1 in self.togglers:
+            if piece2 in self.togglers:
+                return self.togglers[piece1] and self.togglers[piece2]
+            return self.togglers[piece1]
 
+        if piece2 in self.togglers:
+            if piece1 in self.togglers:
+                return self.togglers[piece1] and self.togglers[piece2]
+            return self.togglers[piece2]
+
+        print(piece1)
         if piece1 != "E" and piece2 != "E":
             return True
 
@@ -207,10 +217,7 @@ class BloxorzGame(object):
                 self.blockCoords[3] += 1
 
     def toggleCells(self, letter):
-        for i in range(len(self.puzzle)):
-            for j in range(len(self.puzzle[0])):
-                if self.puzzle[i][j] == letter.lower():
-                    self.togglers[self.puzzle[i][j]] = not self.togglers[self.puzzle[i][j]]
+        self.togglers[letter.lower()] = not self.togglers[letter.lower()]
 
     def testSolution(self):
         return True if self.blockCoords[4] == "V" and self.blockCoords[0] == self.solutionCoords[0] and self.blockCoords[1] == self.solutionCoords[1] else False
