@@ -75,8 +75,6 @@ class BloxorzGame(object):
                 self.gameOver = True
                 print('found solution in', self.numMovements, 'steps')
 
-       
-
         return self.numMovements
 
     def checkTogglers(self):
@@ -87,19 +85,6 @@ class BloxorzGame(object):
             self.toggleCells(block1)
         elif block2.isupper() and block2 not in self.reservedLetters:
             self.toggleCells(block2)
-
-    def validateUp(self):
-        if self.blockCoords[4] == "V":
-            if self.blockCoords[0] - 2 >= 0 and self.isValid(-2, 0, -1, 0):
-                return True
-        elif self.blockCoords[0] == self.blockCoords[2]:
-            if self.blockCoords[0] - 1 >= 0 and self.isValid(-1, 0, -1, 0):
-                return True
-        else:
-            if self.blockCoords[0] - 1 >= 0 and self.puzzle[self.blockCoords[0] - 1][self.blockCoords[1]] != "E" and self.puzzle[self.blockCoords[0] - 1][self.blockCoords[1]] != "F":
-                return True
-
-        return False
 
     def isValid(self, i0, j0, i1, j1):
         piece1 = self.puzzle[self.blockCoords[0] + i0][self.blockCoords[1] + j0]
@@ -121,6 +106,22 @@ class BloxorzGame(object):
 
         return False
 
+    def validateUp(self):
+        if self.blockCoords[4] == "V":
+            if self.blockCoords[0] - 2 >= 0 and self.isValid(-2, 0, -1, 0):
+                return True
+        elif self.blockCoords[0] == self.blockCoords[2]:
+            if self.blockCoords[0] - 1 >= 0 and self.isValid(-1, 0, -1, 0):
+                return True
+        else:
+            piece = self.puzzle[self.blockCoords[0] - 1][self.blockCoords[1]]
+            if piece in self.togglers:
+                return self.togglers[piece]
+
+            return True if self.blockCoords[0] - 1 >= 0 and piece != "E" else False
+
+        return False
+
     def validateDown(self):
         length = len(self.puzzle)
         if self.blockCoords[4] == "V":
@@ -130,8 +131,11 @@ class BloxorzGame(object):
             if self.blockCoords[0] + 1 < length and self.isValid(1, 0, 1, 0):
                 return True
         else:
-            if self.blockCoords[0] + 1 < length and self.puzzle[self.blockCoords[0] + 2][self.blockCoords[1]] != "E" and self.puzzle[self.blockCoords[0] + 2][self.blockCoords[1]] != "F":
-                return True
+            piece = self.puzzle[self.blockCoords[0] + 2][self.blockCoords[1]]
+            if piece in self.togglers:
+                return self.togglers[piece]
+
+            return True if self.blockCoords[0] + 1 < length and piece != "E" else False
 
         return False
 
@@ -140,8 +144,11 @@ class BloxorzGame(object):
             if self.blockCoords[1] - 2 >= 0 and self.isValid(0, -2, 0, -1):
                 return True
         elif self.blockCoords[0] == self.blockCoords[2]:
-            if self.blockCoords[1] - 1 >= 0 and self.puzzle[self.blockCoords[0]][self.blockCoords[1] - 1] != "E" and self.puzzle[self.blockCoords[0]][self.blockCoords[1] - 1] != "F":
-                return True
+            piece = self.puzzle[self.blockCoords[0]][self.blockCoords[1] - 1]
+            if piece in self.togglers:
+                return self.togglers[piece]
+
+            return True if self.blockCoords[1] - 1 >= 0 and piece != "E" else False
         else:
             if self.blockCoords[1] - 1 >= 0 and self.isValid(0, -1, 0, -1):
                 return True
@@ -154,8 +161,11 @@ class BloxorzGame(object):
             if self.blockCoords[3] + 2 < length and self.isValid(0, 1, 0, 2):
                 return True
         elif self.blockCoords[0] == self.blockCoords[2]:
-            if self.blockCoords[3] + 1 < length and self.puzzle[self.blockCoords[0]][self.blockCoords[1] + 2] != "E" and self.puzzle[self.blockCoords[0]][self.blockCoords[1] + 2] != "F":
-                return True
+            piece = self.puzzle[self.blockCoords[0]][self.blockCoords[1] + 2]
+            if piece in self.togglers:
+                return self.togglers[piece]
+
+            return True if self.blockCoords[3] + 1 < length and piece != "E" else False
         else:
             if self.blockCoords[3] + 1 < length and self.isValid(0, 1, 0, 1):
                 return True
