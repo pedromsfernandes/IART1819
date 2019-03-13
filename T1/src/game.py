@@ -43,6 +43,9 @@ class BloxorzGame(object):
             "l": self.validateRight,
         }
 
+        self.numMovements = 0
+        self.gameOver = False
+
     def start(self):
         self.game_over = False
         self.puzzle = []
@@ -66,8 +69,10 @@ class BloxorzGame(object):
     def move(self, direction):
         if self.validateMove(direction):
             self.keyEvents[direction]()
+            self.numMovements += 1
             if self.testSolution():
-                print('found solution!')
+                self.gameOver = True
+                print('found solution in', self.numMovements, 'steps')
 
         block1 = self.puzzle[self.blockCoords[0]][self.blockCoords[1]]
         block2 = self.puzzle[self.blockCoords[2]][self.blockCoords[3]]
@@ -76,6 +81,8 @@ class BloxorzGame(object):
             self.toggleCells(block1)
         elif block2.isupper() and block2 not in self.reservedLetters:
             self.toggleCells(block2)
+
+        return self.numMovements
 
     def validateUp(self):
         if self.blockCoords[4] == "V":

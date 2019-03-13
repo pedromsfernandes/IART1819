@@ -140,6 +140,10 @@ class BloxorzUI(tk.Frame):
 
         self.__draw_grid()
 
+        self.numMovements = tk.StringVar()
+        self.numMovements.set("0")
+        tk.Label(self, textvariable=self.numMovements).pack()
+
         tk.Button(self, text="Solve").pack()
         tk.Button(self, text="Get a tip").pack()
 
@@ -159,8 +163,9 @@ class BloxorzUI(tk.Frame):
 
     def key(self, event):
         print("pressed", repr(event.char))
-        self.game.move(event.char)
-        self.__draw_grid()
+        if not self.game.gameOver:
+            self.numMovements.set(str(self.game.move(event.char)))
+            self.__draw_grid()
 
     def callback(self, event):
         self.canvas.focus_set()
