@@ -70,21 +70,23 @@ class BloxorzGame(object):
         if self.validateMove(direction):
             self.keyEvents[direction]()
             self.numMovements += 1
+            self.checkTogglers()
             if self.testSolution():
                 self.gameOver = True
                 print('found solution in', self.numMovements, 'steps')
 
+       
+
+        return self.numMovements
+
+    def checkTogglers(self):
         block1 = self.puzzle[self.blockCoords[0]][self.blockCoords[1]]
         block2 = self.puzzle[self.blockCoords[2]][self.blockCoords[3]]
 
         if block1.isupper() and block1 not in self.reservedLetters:
-            print("ya")
             self.toggleCells(block1)
         elif block2.isupper() and block2 not in self.reservedLetters:
-            print("ya")
             self.toggleCells(block2)
-
-        return self.numMovements
 
     def validateUp(self):
         if self.blockCoords[4] == "V":
