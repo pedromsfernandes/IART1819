@@ -46,6 +46,7 @@ class BloxorzGame(object):
     def start(self):
         self.game_over = False
         self.puzzle = []
+        self.togglers = {}
         for i in range(len(self.start_puzzle)):
             self.puzzle.append([])
             for j in range(len(self.start_puzzle[0])):
@@ -55,6 +56,8 @@ class BloxorzGame(object):
                     continue
                 elif self.start_puzzle[i][j] == "O":
                     self.solutionCoords = [i, j]
+                elif self.start_puzzle[i][j].islower():
+                    self.togglers[self.start_puzzle[i][j]] = False
                 self.puzzle[i].append(self.start_puzzle[i][j])
 
     def validateMove(self, direction):
@@ -90,7 +93,14 @@ class BloxorzGame(object):
     def isValid(self, i0, j0, i1, j1):
         piece1 = self.puzzle[self.blockCoords[0] + i0][self.blockCoords[1] + j0]
         piece2 = self.puzzle[self.blockCoords[2] + i1][self.blockCoords[3] + j1]
-        return piece1 != "E" and piece2 != "E" and not piece1.islower() and not piece2.islower()
+
+        if piece1 in self.togglers and piece2 in self.togglers:
+            return self.togglers[piece1] and self.togglers[piece2]
+
+        if piece1 != "E" and piece2 != "E":
+            return True
+
+        return False
 
     def validateDown(self):
         length = len(self.puzzle)
@@ -193,7 +203,7 @@ class BloxorzGame(object):
         for i in range(len(self.puzzle)):
             for j in range(len(self.puzzle[0])):
                 if self.puzzle[i][j] == letter.lower():
-                    self.puzzle[i][j] = "A"
+                    self.togglers[self.puzzle[i][j]] = not self.togglers[self.puzzle[i][j]]
 
     def testSolution(self):
         return True if self.blockCoords[4] == "V" and self.blockCoords[0] == self.solutionCoords[0] and self.blockCoords[1] == self.solutionCoords[1] else False

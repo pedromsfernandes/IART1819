@@ -108,7 +108,6 @@ class BloxorzUI(tk.Frame):
             "X": "gray",
             "O": "red",
             "E": "white",
-            "A": "green",
         }
 
         self.__initUI(controller)
@@ -183,6 +182,8 @@ class BloxorzUI(tk.Frame):
                     color = self.colors[self.game.puzzle[i][j]]
                 elif self.game.puzzle[i][j].isupper():
                     color = "orange"
+                elif self.game.puzzle[i][j].islower():
+                    color = "green" if self.game.togglers[self.game.puzzle[i][j]]  else "white"
                 else:
                     color = "white"
 
