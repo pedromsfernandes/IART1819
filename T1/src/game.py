@@ -82,13 +82,17 @@ class BloxorzGame(object):
         block2 = self.puzzle[self.blockCoords[2]][self.blockCoords[3]]
 
         if block1.isupper() and block1 not in self.reservedLetters:
-            self.toggleCells(block1)
+            if block1 > "G" and self.blockCoords[4] == 'V' or block1 < "G":
+                self.toggleCells(block1)
         elif block2.isupper() and block2 not in self.reservedLetters:
-            self.toggleCells(block2)
+            if block2 > "G" and self.blockCoords[4] == 'V' or block2 < "G":
+                self.toggleCells(block2)
 
     def isValid(self, i0, j0, i1, j1):
-        piece1 = self.puzzle[self.blockCoords[0] + i0][self.blockCoords[1] + j0]
-        piece2 = self.puzzle[self.blockCoords[2] + i1][self.blockCoords[3] + j1]
+        piece1 = self.puzzle[self.blockCoords[0] +
+                             i0][self.blockCoords[1] + j0]
+        piece2 = self.puzzle[self.blockCoords[2] +
+                             i1][self.blockCoords[3] + j1]
 
         if piece1 in self.togglers:
             if piece2 in self.togglers:
