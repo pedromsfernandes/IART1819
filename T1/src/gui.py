@@ -9,6 +9,7 @@ SIDE = 50  # Width of every board cell.
 WIDTH = HEIGHT = MARGIN * 2 + SIDE * 9  # Width and height of the whole board
 levelInt = 1
 
+
 def nextCallback(level, numLevels):
     global levelInt
     if levelInt < numLevels:
@@ -108,7 +109,6 @@ class BloxorzUI(tk.Frame):
             "X": "gray",
             "O": "red",
             "E": "white",
-            "A": "green",
         }
 
         self.__initUI(controller)
@@ -127,6 +127,17 @@ class BloxorzUI(tk.Frame):
             self.i = 0
         algorithm.set(self.algorithms[self.i])
 
+    def solve(self):
+        tk.Label(self, text="Statistics").pack()
+        tk.Label(self, text="Expanded nodes").pack()
+        self.nodes = tk.StringVar()
+        self.nodes.set("0")
+        self.time = tk.StringVar()
+        self.time.set("0 s")
+        tk.Label(self, textvariable=self.nodes).pack()
+        tk.Label(self, text="Time:").pack()
+        tk.Label(self, textvariable=self.time).pack()
+
     def __initUI(self, controller):
         numLines = len(self.game.puzzle)
         numColumns = len(self.game.puzzle[0])
@@ -141,13 +152,18 @@ class BloxorzUI(tk.Frame):
 
         self.__draw_grid()
 
-        tk.Button(self, text="Solve").pack()
+        self.numMovements = tk.StringVar()
+        self.numMovements.set("0")
+        tk.Label(self, textvariable=self.numMovements).pack()
+
+        tk.Button(self, text="Solve", command=self.solve).pack()
         tk.Button(self, text="Get a tip").pack()
 
         tk.Label(self, textvariable=algorithm).pack()
         tk.Button(self, text="Previous",
                   command=lambda: self.prevCallback(algorithm)).pack()
-        tk.Button(self, text="Next", command=lambda: self.nextCallback(algorithm)).pack()
+        tk.Button(self, text="Next",
+                  command=lambda: self.nextCallback(algorithm)).pack()
 
         tk.Button(self, text="Exit",
                   command=lambda: controller.show_frame(MainMenu)).pack()
@@ -160,8 +176,9 @@ class BloxorzUI(tk.Frame):
 
     def key(self, event):
         print("pressed", repr(event.char))
-        self.game.move(event.char)
-        self.__draw_grid()
+        if not self.game.gameOver:
+            self.numMovements.set(str(self.game.move(event.char)))
+            self.__draw_grid()
 
     def callback(self, event):
         self.canvas.focus_set()
@@ -179,10 +196,16 @@ class BloxorzUI(tk.Frame):
                 y1 = y0 + SIDE
 
                 color = ""
-                if self.game.puzzle[i][j] in self.colors:
-                    color = self.colors[self.game.puzzle[i][j]]
-                elif self.game.puzzle[i][j].isupper():
-                    color = "orange"
+                place = self.game.puzzle[i][j]
+                if place in self.colors:
+                    color = self.colors[place]
+                elif place.isupper():
+                    if place < "G":
+                        color = "orange"
+                    else:
+                        color = "yellow"
+                elif place.islower():
+                    color = "green" if self.game.togglers[place] else "white"
                 else:
                     color = "white"
 
