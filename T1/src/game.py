@@ -1,5 +1,5 @@
 from array import *
-
+from aima_search import Problem
 
 class BloxorzBoard(object):
     def __init__(self, board_file):
@@ -273,3 +273,9 @@ def evaluateState(level):
 
 def testSolution(level):
     print("to implement")
+
+
+class BloxorzProblem(Problem):
+    
+    def __init__(self, initial, goal):
+        Problem.__init__(self, initial, goal)
