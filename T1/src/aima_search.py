@@ -106,6 +106,7 @@ class Node:
 
     def expand(self, problem):
         """List the nodes reachable in one step from this node."""
+        
         return [self.child_node(problem, action)
                 for action in problem.actions(self.state)]
 
@@ -221,6 +222,7 @@ def depth_first_graph_search(problem):
         Does not get trapped by loops.
         If two paths reach a state, only use the first one. [Figure 3.7]"""
     frontier = [(Node(problem.initial))]  # Stack
+
     explored = set()
     while frontier:
         node = frontier.pop()

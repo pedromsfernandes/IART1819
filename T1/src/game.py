@@ -1,6 +1,6 @@
 from array import *
 from aima_search import Problem
-
+import copy
 class BloxorzBoard(object):
     def __init__(self, board_file):
         self.board = self.__create_board(board_file)
@@ -104,7 +104,6 @@ class BloxorzGame(object):
                 return self.togglers[piece1] and self.togglers[piece2]
             return self.togglers[piece2]
 
-        print(piece1)
         if piece1 != "E" and piece2 != "E":
             return True
 
@@ -239,12 +238,20 @@ class BloxorzGame(object):
         return True if self.blockCoords[4] == "V" and self.blockCoords[0] == self.solutionCoords[0] and self.blockCoords[1] == self.solutionCoords[1] else False
 
 
-def readLevel(levelId):
-    file = open("../res/levels/level" + str(levelId) + ".txt", "r")
+def readBoard(stateFile):
+    file = open(stateFile, "r")
     lines = file.readlines()
-    file.close()
 
-    return lines
+    board = []
+    for line in lines:
+        line = line.strip()
+        board.append([])
+
+        for c in line:
+            board[-1].append(c)
+
+    file.close()
+    return board
 
 
 def fileToLevel(lines):
@@ -274,88 +281,135 @@ def evaluateState(level):
 def testSolution(level):
     print("to implement")
 
+class State:
+    def __init__(self, blockCoords, solutionCoords, board, togglers):
+        self.blockCoords = blockCoords
+        self.solutionCoords = solutionCoords
+        self.board = board
+        self.togglers = togglers
+
+    def __lt__(self, state):
+        d1 = (self.blockCoords[2] - self.blockCoords[0]) + (self.blockCoords[3] - self.blockCoords[1])
+        d2 = (state.blockCoords[2] - state.blockCoords[0]) + (state.blockCoords[3] - state.blockCoords[1])
+
+        return d1 < d2
+
+def loadInitialState(stateFile):
+    init_board = readBoard(stateFile)
+    blockCoords = []
+    solutionCoords = []
+    board = []
+    togglers = {}
+
+    for i in range(len(init_board)):
+        board.append([])
+        for j in range(len(init_board[0])):
+            if init_board[i][j] == "V":
+                blockCoords = [i, j, i, j, "V"]
+                board[i].append("X")
+                continue
+            elif init_board[i][j] == "O":
+                solutionCoords = [i, j]
+            elif init_board[i][j].islower():
+                togglers[init_board[i][j]] = False
+            board[i].append(init_board[i][j])
+
+    state = State(blockCoords, solutionCoords, board, togglers)
+
+    return state
+    
 
 class BloxorzProblem(Problem):
     
-    def __init__(self, initial, goal):
-        Problem.__init__(self, initial, goal)
+    def __init__(self, initial):
+        self.initial = initial
+        Problem.__init__(self, self.initial)
 
     def actions(self, state):
         possibleActions = ['Up', 'Down', 'Left', 'Right']
+        validActions = []
 
         for action in possibleActions:
-            if not self.validate(action, state):
-                possibleActions.remove(action)
+            if self.validate(action, state):
+                validActions.append(action)
 
-        return possibleActions
+        return validActions
 
     def resultUp(self, blockCoords):
 
+        nextBlockCoords = blockCoords.copy()
+
         if blockCoords[4] == "V":
-            blockCoords[0] -= 2
-            blockCoords[2] -= 1
-            blockCoords[4] = "H"
+            nextBlockCoords[0] -= 2
+            nextBlockCoords[2] -= 1
+            nextBlockCoords[4] = "H"
         elif blockCoords[4] == "H":
             if blockCoords[0] == blockCoords[2]:
-                blockCoords[0] -= 1
-                blockCoords[2] -= 1
+                nextBlockCoords[0] -= 1
+                nextBlockCoords[2] -= 1
             else:
-                blockCoords[0] -= 1
-                blockCoords[2] -= 2
-                blockCoords[4] = "V"
+                nextBlockCoords[0] -= 1
+                nextBlockCoords[2] -= 2
+                nextBlockCoords[4] = "V"
 
-        return blockCoords
+        return nextBlockCoords
 
     def resultDown(self, blockCoords):
 
+        nextBlockCoords = blockCoords.copy()
+
         if blockCoords[4] == "V":
-            blockCoords[0] += 1
-            blockCoords[2] += 2
-            blockCoords[4] = "H"
+            nextBlockCoords[0] += 1
+            nextBlockCoords[2] += 2
+            nextBlockCoords[4] = "H"
         elif blockCoords[4] == "H":
             if blockCoords[0] == blockCoords[2]:
-                blockCoords[0] += 1
-                blockCoords[2] += 1
+                nextBlockCoords[0] += 1
+                nextBlockCoords[2] += 1
             else:
-                blockCoords[0] += 2
-                blockCoords[2] += 1
-                blockCoords[4] = "V"
+                nextBlockCoords[0] += 2
+                nextBlockCoords[2] += 1
+                nextBlockCoords[4] = "V"
 
-        return blockCoords
+        return nextBlockCoords
 
     def resultLeft(self, blockCoords):
 
+        nextBlockCoords = blockCoords.copy()
+
         if blockCoords[4] == "V":
-            blockCoords[1] -= 2
-            blockCoords[3] -= 1
-            blockCoords[4] = "H"
+            nextBlockCoords[1] -= 2
+            nextBlockCoords[3] -= 1
+            nextBlockCoords[4] = "H"
         elif blockCoords[4] == "H":
             if blockCoords[0] == blockCoords[2]:
-                blockCoords[1] -= 1
-                blockCoords[3] -= 2
-                blockCoords[4] = "V"
+                nextBlockCoords[1] -= 1
+                nextBlockCoords[3] -= 2
+                nextBlockCoords[4] = "V"
             else:
-                blockCoords[1] -= 1
-                blockCoords[3] -= 1    
+                nextBlockCoords[1] -= 1
+                nextBlockCoords[3] -= 1    
 
-        return blockCoords
+        return nextBlockCoords
 
     def resultRight(self, blockCoords):
 
+        nextBlockCoords = blockCoords.copy()
+
         if blockCoords[4] == "V":
-            blockCoords[1] += 1
-            blockCoords[3] += 2
-            blockCoords[4] = "H"
+            nextBlockCoords[1] += 1
+            nextBlockCoords[3] += 2
+            nextBlockCoords[4] = "H"
         elif blockCoords[4] == "H":
             if blockCoords[0] == blockCoords[2]:
-                blockCoords[1] += 2
-                blockCoords[3] += 1
-                blockCoords[4] = "V"
+                nextBlockCoords[1] += 2
+                nextBlockCoords[3] += 1
+                nextBlockCoords[4] = "V"
             else:
-                blockCoords[1] += 1
-                blockCoords[3] += 1
+                nextBlockCoords[1] += 1
+                nextBlockCoords[3] += 1
 
-        return blockCoords
+        return nextBlockCoords
 
     def checkTogglers(self, state):
 
@@ -364,28 +418,29 @@ class BloxorzProblem(Problem):
         togglers = state.togglers
 
         reservedLetters = ["X", "E", "O", "A"]
-
         block1 = board[blockCoords[0]][blockCoords[1]]
         block2 = board[blockCoords[2]][blockCoords[3]]
 
         if block1.isupper() and block1 not in reservedLetters:
             if block1 > "G" and blockCoords[4] == 'V' or block1 < "G":
-                togglers[block1] = not togglers[block1]
+                togglers[block1.lower()] = not togglers[block1.lower()]
         elif block2.isupper() and block2 not in reservedLetters:
             if block2 > "G" and blockCoords[4] == 'V' or block2 < "G":
-                togglers[block2] = not togglers[block2]
+                togglers[block2.lower()] = not togglers[block2.lower()]
 
         return togglers
 
     def result(self, state, action):
+        
+        nextState = copy.copy(state)
 
         possibleActions = ['Up', 'Down', 'Left', 'Right']
         resultCheckers = [self.resultUp, self.resultDown, self.resultLeft, self.resultRight]
 
-        state.blockCoords = resultCheckers[possibleActions.index(action)](state.blockCoords)
-        state.togglers = self.checkTogglers(state)
+        nextState.blockCoords = resultCheckers[possibleActions.index(action)](state.blockCoords)
+        nextState.togglers = self.checkTogglers(nextState)
 
-        return state
+        return nextState
 
     def goal_test(self, state):
 
@@ -416,7 +471,6 @@ class BloxorzProblem(Problem):
                 return togglers[piece1] and togglers[piece2]
             return togglers[piece2]
 
-        print(piece1)
         if piece1 != "E" and piece2 != "E":
             return True
 
