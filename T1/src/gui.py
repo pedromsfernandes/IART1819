@@ -3,6 +3,7 @@ from utils import getNumLevels
 import tkinter as tk                # python 3
 from tkinter import font as tkfont  # python 3
 from game import BloxorzGame
+import time
 
 MARGIN = 20  # Pixels around the board
 SIDE = 50  # Width of every board cell.
@@ -59,7 +60,6 @@ class Bloxorz(tk.Tk):
 
     def initGame(self):
         game = BloxorzGame("../res/levels/level" + str(levelInt) + ".txt")
-        game.start()
 
         bloxorzUIFrame = BloxorzUI(self.container, self, game)
         self.frames[BloxorzUI] = bloxorzUIFrame
@@ -111,6 +111,13 @@ class BloxorzUI(tk.Frame):
             "E": "white",
         }
 
+        self.keyToAction = {
+            "i": "Up",
+            "k": "Down",
+            "j": "Left",
+            "l": "Right",
+        }
+
         self.__initUI(controller)
 
     def prevCallback(self, algorithm):
@@ -127,20 +134,31 @@ class BloxorzUI(tk.Frame):
             self.i = 0
         algorithm.set(self.algorithms[self.i])
 
+    def tip(self):
+        tip = self.game.tip(self.algorithms[self.i])
+        tk.Label(self, text=tip).pack()
+
     def solve(self):
+        start = time.time()
+        actions = self.game.solve(self.algorithms[self.i])
+        end = time.time()
+        self.solveAnim(actions)
+        duration = end - start
+        print(actions)
+        
         tk.Label(self, text="Statistics").pack()
         tk.Label(self, text="Expanded nodes").pack()
         self.nodes = tk.StringVar()
         self.nodes.set("0")
         self.time = tk.StringVar()
-        self.time.set("0 s")
+        self.time.set(str(duration) + " s")
         tk.Label(self, textvariable=self.nodes).pack()
         tk.Label(self, text="Time:").pack()
         tk.Label(self, textvariable=self.time).pack()
 
     def __initUI(self, controller):
-        numLines = len(self.game.puzzle)
-        numColumns = len(self.game.puzzle[0])
+        numLines = len(self.game.start_board)
+        numColumns = len(self.game.start_board[0])
 
         algorithm = tk.StringVar()
         algorithm.set(self.algorithms[self.i])
@@ -157,7 +175,7 @@ class BloxorzUI(tk.Frame):
         tk.Label(self, textvariable=self.numMovements).pack()
 
         tk.Button(self, text="Solve", command=self.solve).pack()
-        tk.Button(self, text="Get a tip").pack()
+        tk.Button(self, text="Get a tip", command=self.tip).pack()
 
         tk.Label(self, textvariable=algorithm).pack()
         tk.Button(self, text="Previous",
@@ -174,10 +192,18 @@ class BloxorzUI(tk.Frame):
     def validMove(self, initState, afterState):
         print("todo")
 
+    def solveAnim(self, solution):
+        for action in solution:
+            self.game.move(action)
+            self.__draw_grid()
+            self.update()
+            time.sleep(0.5) 
+
+
     def key(self, event):
         print("pressed", repr(event.char))
         if not self.game.gameOver:
-            self.numMovements.set(str(self.game.move(event.char)))
+            self.numMovements.set(str(self.game.move(self.keyToAction[event.char])))
             self.__draw_grid()
 
     def callback(self, event):
@@ -185,8 +211,8 @@ class BloxorzUI(tk.Frame):
         print("clicked at", event.x, event.y)
 
     def __draw_grid(self):
-        numLines = len(self.game.puzzle)
-        numColumns = len(self.game.puzzle[0])
+        numLines = len(self.game.start_board)
+        numColumns = len(self.game.start_board[0])
         y0 = MARGIN
         x0 = MARGIN
 
@@ -196,7 +222,7 @@ class BloxorzUI(tk.Frame):
                 y1 = y0 + SIDE
 
                 color = ""
-                place = self.game.puzzle[i][j]
+                place = self.game.state.board[i][j]
                 if place in self.colors:
                     color = self.colors[place]
                 elif place.isupper():
@@ -205,7 +231,7 @@ class BloxorzUI(tk.Frame):
                     else:
                         color = "yellow"
                 elif place.islower():
-                    color = "green" if self.game.togglers[place] else "white"
+                    color = "green" if self.game.state.togglers[place] else "white"
                 else:
                     color = "white"
 
@@ -216,14 +242,14 @@ class BloxorzUI(tk.Frame):
             x0 = MARGIN
             y0 += SIDE
 
-        x0 = MARGIN + SIDE * self.game.blockCoords[1]
-        y0 = MARGIN + SIDE * self.game.blockCoords[0]
+        x0 = MARGIN + SIDE * self.game.state.blockCoords[1]
+        y0 = MARGIN + SIDE * self.game.state.blockCoords[0]
 
         self.canvas.create_rectangle(
             x0, y0, x0 + SIDE, y0 + SIDE, fill="blue")
 
-        x0 = MARGIN + SIDE * self.game.blockCoords[3]
-        y0 = MARGIN + SIDE * self.game.blockCoords[2]
+        x0 = MARGIN + SIDE * self.game.state.blockCoords[3]
+        y0 = MARGIN + SIDE * self.game.state.blockCoords[2]
 
         self.canvas.create_rectangle(
             x0, y0, x0 + SIDE, y0 + SIDE, fill="blue")
