@@ -1,7 +1,7 @@
 from array import *
 from aima_search import Problem
 import copy
-from aima_search import uniform_cost_search, depth_first_tree_search, breadth_first_graph_search, iterative_deepening_search
+from aima_search import uniform_cost_search, depth_first_graph_search, breadth_first_graph_search, iterative_deepening_search, greedy_best_first_graph_search
 
 class BloxorzBoard(object):
     def __init__(self, board_file):
@@ -33,10 +33,11 @@ class BloxorzGame(object):
         self.reservedLetters = ["X", "E", "O", "A"]
 
         self.algorithms = {
-            "DFS": depth_first_tree_search,
+            "DFS": depth_first_graph_search,
             "BFS": breadth_first_graph_search,
             "UCS": uniform_cost_search,
-            "IDDFS": iterative_deepening_search
+            "IDDFS": iterative_deepening_search,
+            "GS": greedy_best_first_graph_search
         }
         
         self.numMovements = 0
@@ -47,12 +48,10 @@ class BloxorzGame(object):
         return self.algorithms[algorithm](self.problem).solution()[0]
 
     def solve(self, algorithm):
-        self.problem.setState(self.state)
-        sol = self.algorithms[algorithm](self.problem).solution()
+        currState = copy.deepcopy(self.state)
+        self.problem.setState(currState)
 
-        print(sol)
-
-        return sol
+        return self.algorithms[algorithm](self.problem)
 
     def move(self, action):
 
@@ -75,11 +74,37 @@ class State:
         self.togglers = togglers
 
     def __lt__(self, state):
+
         d1 = (self.blockCoords[2] - self.blockCoords[0]) + (self.blockCoords[3] - self.blockCoords[1])
         d2 = (state.blockCoords[2] - state.blockCoords[0]) + (state.blockCoords[3] - state.blockCoords[1])
 
-        return d1 < d2
+        if not self.togglers:
+            return d1 < d2
+        else:
+            num1 = 0
+            num2 = 0
 
+            for key in self.togglers:
+                if self.togglers[key]:
+                    num1+=1
+            
+            for key in state.togglers:
+                if state.togglers[key]:
+                    num2+=1
+                    
+            if num1 == 0 and num2 == 0:
+                if len(self.togglers) == 1:
+                    (x1,y1) = getCoords(self.board, state.togglers.keys[0])
+                    (x2,y2) = getCoords(state.board, state.togglers.keys[0])
+
+
+            return d1 < d2 if num1 == num2 else num1 > num2
+
+def getCoords(board, block):
+    for i in range(len(board)):
+        for j in range(len(board[0])):
+            if board[i][j] == block:
+                return (i, j)
 
 def getInitialState(init_board):
     blockCoords = []
@@ -105,11 +130,11 @@ def getInitialState(init_board):
 class BloxorzProblem(Problem):
     
     def __init__(self, initial):
-        self.initial = initial
+        self.initial = copy.copy(initial)
         Problem.__init__(self, self.initial)
 
     def setState(self, state):
-        self.initial = state
+        self.initial = copy.copy(state)
 
     def actions(self, state):
         possibleActions = ['Up', 'Down', 'Left', 'Right']
@@ -225,7 +250,6 @@ class BloxorzProblem(Problem):
 
         nextState.blockCoords = resultCheckers[possibleActions.index(action)](state.blockCoords)
         nextState.togglers = self.checkTogglers(nextState)
-        print(nextState.togglers)
         return nextState
 
     def goal_test(self, state):
@@ -353,7 +377,6 @@ class BloxorzProblem(Problem):
     def validate(self, action, state):
         actions = ['Up', 'Down', 'Left', 'Right']
         validators = [self.validateUp, self.validateDown, self.validateLeft, self.validateRight]
-        print(state.blockCoords)
         return validators[actions.index(action)](state)
 
 def fileToLevel(lines):

@@ -1,3 +1,10 @@
+from operator import itemgetter
+import copy
+import bisect
+import sys
+import random
+import math
+from collections import defaultdict, deque
 """Search (Chapters 3-4)
 
 From https://github.com/aimacode/aima-python/
@@ -12,12 +19,7 @@ from aima_utils import (
     distance, vector_add
 )
 
-from collections import defaultdict, deque
-import math
-import random
-import sys
-import bisect
-from operator import itemgetter
+numNodes = 0
 
 
 infinity = float('inf')
@@ -36,7 +38,7 @@ class Problem(object):
         """The constructor specifies the initial state, and possibly a goal
         state, if there is a unique goal. Your subclass's constructor can add
         other arguments."""
-        self.initial = initial
+        self.initial = copy.copy(initial)
         self.goal = goal
 
     def actions(self, state):
@@ -90,7 +92,7 @@ class Node:
 
     def __init__(self, state, parent=None, action=None, path_cost=0):
         """Create a search tree Node, derived from a parent by an action."""
-        self.state = state
+        self.state = copy.copy(state)
         self.parent = parent
         self.action = action
         self.path_cost = path_cost
@@ -106,7 +108,9 @@ class Node:
 
     def expand(self, problem):
         """List the nodes reachable in one step from this node."""
-        
+        global numNodes
+        numNodes += 1
+
         return [self.child_node(problem, action)
                 for action in problem.actions(self.state)]
 
@@ -114,10 +118,10 @@ class Node:
         """[Figure 3.10]"""
         next_state = problem.result(self.state, action)
         next_node = Node(next_state, self, action,
-                    problem.path_cost(self.path_cost, self.state,
-                                      action, next_state))
+                         problem.path_cost(self.path_cost, self.state,
+                                           action, next_state))
         return next_node
-    
+
     def solution(self):
         """Return the sequence of actions to go from the root to this node."""
         return [node.action for node in self.path()[1:]]
@@ -221,13 +225,18 @@ def depth_first_graph_search(problem):
         The argument frontier should be an empty queue.
         Does not get trapped by loops.
         If two paths reach a state, only use the first one. [Figure 3.7]"""
+
+    global numNodes
+
     frontier = [(Node(problem.initial))]  # Stack
 
     explored = set()
     while frontier:
         node = frontier.pop()
         if problem.goal_test(node.state):
-            return node
+            nodes = numNodes
+            numNodes = 0
+            return (node, nodes)
         explored.add(node.state)
         frontier.extend(child for child in node.expand(problem)
                         if child.state not in explored and
@@ -236,6 +245,7 @@ def depth_first_graph_search(problem):
 
 
 def breadth_first_graph_search(problem):
+    global numNodes
     """[Figure 3.11]
     Note that this function can be implemented in a
     single line as below:
@@ -243,7 +253,7 @@ def breadth_first_graph_search(problem):
     """
     node = Node(problem.initial)
     if problem.goal_test(node.state):
-        return node
+        return (node, numNodes)
     frontier = deque([node])
     explored = set()
     while frontier:
@@ -252,7 +262,9 @@ def breadth_first_graph_search(problem):
         for child in node.expand(problem):
             if child.state not in explored and child not in frontier:
                 if problem.goal_test(child.state):
-                    return child
+                    nodes = numNodes
+                    numNodes = 0
+                    return (child, nodes)
                 frontier.append(child)
     return None
 
@@ -265,6 +277,8 @@ def best_first_graph_search(problem, f):
     There is a subtlety: the line "f = memoize(f, 'f')" means that the f
     values will be cached on the nodes as they are computed. So after doing
     a best first search you can examine the f values of the path returned."""
+    global numNodes
+
     f = memoize(f, 'f')
     node = Node(problem.initial)
     frontier = PriorityQueue('min', f)
@@ -273,7 +287,9 @@ def best_first_graph_search(problem, f):
     while frontier:
         node = frontier.pop()
         if problem.goal_test(node.state):
-            return node
+            nodes = numNodes
+            numNodes = 0
+            return (node, nodes)
         explored.add(node.state)
         for child in node.expand(problem):
             if child.state not in explored and child not in frontier:
@@ -313,22 +329,26 @@ def depth_limited_search(problem, limit=50):
 
 def iterative_deepening_search(problem):
     """[Figure 3.18]"""
+    global numNodes
+
     for depth in range(sys.maxsize):
         result = depth_limited_search(problem, depth)
         if result != 'cutoff':
-            return result
+            nodes = numNodes
+            numNodes = 0
+            return (result, nodes)
 
 # ______________________________________________________________________________
 # Bidirectional Search
 # Pseudocode from https://webdocs.cs.ualberta.ca/%7Eholte/Publications/MM-AAAI2016.pdf
 
+
 def bidirectional_search(problem):
     e = problem.find_min_edge()
-    gF, gB = {problem.initial : 0}, {problem.goal : 0}
+    gF, gB = {problem.initial: 0}, {problem.goal: 0}
     openF, openB = [problem.initial], [problem.goal]
     closedF, closedB = [], []
     U = infinity
-
 
     def extend(U, open_dir, open_other, g_dir, g_other, closed_dir):
         """Extend search in given direction"""
@@ -352,7 +372,6 @@ def bidirectional_search(problem):
 
         return U, open_dir, closed_dir, g_dir
 
-
     def find_min(open_dir, g):
         """Finds minimum priority, g and f values in open_dir"""
         m, m_f = infinity, infinity
@@ -363,7 +382,6 @@ def bidirectional_search(problem):
             m_f = min(m_f, f)
 
         return m, m_f, min(g.values())
-
 
     def find_key(pr_min, open_dir, g):
         """Finds key in open_dir with value equal to pr_min
@@ -378,7 +396,6 @@ def bidirectional_search(problem):
                     state = n
 
         return state
-
 
     while openF and openB:
         pr_min_f, f_min_f, g_min_f = find_min(openF, gF)
@@ -413,31 +430,32 @@ def astar_search(problem, h=None):
     return best_first_graph_search(problem, lambda n: n.path_cost + h(n))
 
 # ______________________________________________________________________________
-# A* heuristics 
+# A* heuristics
+
 
 class EightPuzzle(Problem):
 
     """ The problem of sliding tiles numbered from 1 to 8 on a 3x3 board,
     where one of the squares is a blank. A state is represented as a tuple of length 9,
     where element at index i represents the tile number  at index i (0 if it's an empty square) """
- 
+
     def __init__(self, initial, goal=(1, 2, 3, 4, 5, 6, 7, 8, 0)):
         """ Define goal state and initialize a problem """
 
         self.goal = goal
         Problem.__init__(self, initial, goal)
-    
+
     def find_blank_square(self, state):
         """Return the index of the blank square in a given state"""
 
         return state.index(0)
-    
+
     def actions(self, state):
         """ Return the actions that can be executed in the given state.
         The result would be a list, since there are only four possible actions
         in any given state of the environment """
-        
-        possible_actions = ['UP', 'DOWN', 'LEFT', 'RIGHT']       
+
+        possible_actions = ['UP', 'DOWN', 'LEFT', 'RIGHT']
         index_blank_square = self.find_blank_square(state)
 
         if index_blank_square % 3 == 0:
@@ -459,7 +477,7 @@ class EightPuzzle(Problem):
         blank = self.find_blank_square(state)
         new_state = list(state)
 
-        delta = {'UP':-3, 'DOWN':3, 'LEFT':-1, 'RIGHT':1}
+        delta = {'UP': -3, 'DOWN': 3, 'LEFT': -1, 'RIGHT': 1}
         neighbor = blank + delta[action]
         new_state[blank], new_state[neighbor] = new_state[neighbor], new_state[blank]
 
@@ -476,11 +494,11 @@ class EightPuzzle(Problem):
         inversion = 0
         for i in range(len(state)):
             for j in range(i+1, len(state)):
-                if (state[i] > state[j]) and state[i] != 0 and state[j]!= 0:
+                if (state[i] > state[j]) and state[i] != 0 and state[j] != 0:
                     inversion += 1
-        
+
         return inversion % 2 == 0
-    
+
     def h(self, node):
         """ Return the heuristic value for a given state. Default heuristic function used is 
         h(n) = number of misplaced tiles """
@@ -660,9 +678,11 @@ def simulated_annealing(problem, schedule=exp_schedule()):
         if not neighbors:
             return current.state
         next_choice = random.choice(neighbors)
-        delta_e = problem.value(next_choice.state) - problem.value(current.state)
+        delta_e = problem.value(next_choice.state) - \
+            problem.value(current.state)
         if delta_e > 0 or probability(math.exp(delta_e / T)):
             current = next_choice
+
 
 def simulated_annealing_full(problem, schedule=exp_schedule()):
     """ This version returns all the states encountered in reaching 
@@ -678,9 +698,11 @@ def simulated_annealing_full(problem, schedule=exp_schedule()):
         if not neighbors:
             return current.state
         next_choice = random.choice(neighbors)
-        delta_e = problem.value(next_choice.state) - problem.value(current.state)
+        delta_e = problem.value(next_choice.state) - \
+            problem.value(current.state)
         if delta_e > 0 or probability(math.exp(delta_e / T)):
             current = next_choice
+
 
 def and_or_graph_search(problem):
     """[Figure 4.11]Used when the environment is nondeterministic and completely observable.
@@ -717,10 +739,13 @@ def and_or_graph_search(problem):
     # body of and or search
     return or_search(problem.initial, problem, [])
 
+
 # Pre-defined actions for PeakFindingProblem
-directions4 = { 'W':(-1, 0), 'N':(0, 1), 'E':(1, 0), 'S':(0, -1) }
-directions8 = dict(directions4) 
-directions8.update({'NW':(-1, 1), 'NE':(1, 1), 'SE':(1, -1), 'SW':(-1, -1) })
+directions4 = {'W': (-1, 0), 'N': (0, 1), 'E': (1, 0), 'S': (0, -1)}
+directions8 = dict(directions4)
+directions8.update({'NW': (-1, 1), 'NE': (1, 1),
+                    'SE': (1, -1), 'SW': (-1, -1)})
+
 
 class PeakFindingProblem(Problem):
     """Problem of finding the highest peak in a limited grid"""
@@ -868,7 +893,7 @@ class LRTAStarAgent:
 
                 # minimum cost for action b in problem.actions(s)
                 self.H[self.s] = min(self.LRTA_cost(self.s, b, self.problem.output(self.s, b),
-                                     self.H) for b in self.problem.actions(self.s))
+                                                    self.H) for b in self.problem.actions(self.s))
 
             # an action b in problem.actions(s1) that minimizes costs
             self.a = argmin(self.problem.actions(s1),
@@ -919,7 +944,6 @@ def genetic_algorithm(population, fitness_fn, gene_pool=[0, 1], f_thres=None, ng
         if fittest_individual:
             return fittest_individual
 
-
     return argmax(population, key=fitness_fn)
 
 
@@ -934,7 +958,6 @@ def fitness_threshold(fitness_fn, f_thres, population):
     return None
 
 
-
 def init_population(pop_number, gene_pool, state_length):
     """Initializes population for genetic algorithm
     pop_number  :  Number of individuals in population
@@ -943,7 +966,8 @@ def init_population(pop_number, gene_pool, state_length):
     g = len(gene_pool)
     population = []
     for i in range(pop_number):
-        new_individual = [gene_pool[random.randrange(0, g)] for j in range(state_length)]
+        new_individual = [gene_pool[random.randrange(
+            0, g)] for j in range(state_length)]
         population.append(new_individual)
 
     return population
@@ -970,7 +994,7 @@ def recombine_uniform(x, y):
         result[ix] = x[ix] if i < n / 2 else y[ix]
 
     return ''.join(str(r) for r in result)
-        
+
 
 def mutate(x, gene_pool, pmut):
     if random.uniform(0, 1) >= pmut:
@@ -1042,14 +1066,15 @@ class Graph:
     def nodes(self):
         """Return a list of nodes in the graph."""
         s1 = set([k for k in self.graph_dict.keys()])
-        s2 = set([k2 for v in self.graph_dict.values() for k2, v2 in v.items()])
+        s2 = set([k2 for v in self.graph_dict.values()
+                  for k2, v2 in v.items()])
         nodes = s1.union(s2)
         return list(nodes)
 
 
 def UndirectedGraph(graph_dict=None):
     """Build a Graph where every edge (including future ones) goes both ways."""
-    return Graph(graph_dict = graph_dict, directed=False)
+    return Graph(graph_dict=graph_dict, directed=False)
 
 
 def RandomGraph(nodes=list(range(10)), min_links=2, width=400, height=300,
@@ -1130,7 +1155,7 @@ vacuum_world = Graph(dict(
     State_6=dict(Suck=['State_8'], Left=['State_5']),
     State_7=dict(Suck=['State_7', 'State_3'], Right=['State_8']),
     State_8=dict(Suck=['State_8', 'State_6'], Left=['State_7'])
-    ))
+))
 
 """ [Figure 4.23]
 One-dimensional state space Graph
@@ -1142,7 +1167,7 @@ one_dim_state_space = Graph(dict(
     State_4=dict(Right='State_5', Left='State_3'),
     State_5=dict(Right='State_6', Left='State_4'),
     State_6=dict(Left='State_5')
-    ))
+))
 one_dim_state_space.least_costs = dict(
     State_1=8,
     State_2=9,
@@ -1561,4 +1586,3 @@ def compare_graph_searchers():
                                 GraphProblem('Q', 'WA', australia_map)],
                       header=['Searcher', 'romania_map(Arad, Bucharest)',
                               'romania_map(Oradea, Neamt)', 'australia_map'])
-
