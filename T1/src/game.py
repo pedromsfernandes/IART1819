@@ -3,6 +3,7 @@ from aima_search import Problem
 import copy
 from aima_search import uniform_cost_search, depth_first_graph_search, breadth_first_graph_search, iterative_deepening_search, greedy_best_first_graph_search
 
+
 class BloxorzBoard(object):
     def __init__(self, board_file):
         self.board = self.__create_board(board_file)
@@ -39,13 +40,15 @@ class BloxorzGame(object):
             "IDDFS": iterative_deepening_search,
             "GS": greedy_best_first_graph_search
         }
-        
+
         self.numMovements = 0
         self.gameOver = False
 
     def tip(self, algorithm):
         self.problem.setState(self.state)
-        return self.algorithms[algorithm](self.problem).solution()[0]
+
+        (goalNode, node) = self.algorithms[algorithm](self.problem)
+        return goalNode.solution()[0]
 
     def solve(self, algorithm):
         currState = copy.deepcopy(self.state)
@@ -65,7 +68,6 @@ class BloxorzGame(object):
         return self.numMovements
 
 
-
 class State:
     def __init__(self, blockCoords, solutionCoords, board, togglers):
         self.blockCoords = blockCoords
@@ -73,38 +75,41 @@ class State:
         self.board = board
         self.togglers = togglers
 
-    def __lt__(self, state):
+    def __eq__(self, other):
+        return self.blockCoords == other.blockCoords and self.solutionCoords == other.solutionCoords and self.board == other.board and self.togglers == other.togglers
 
-        d1 = (self.blockCoords[2] - self.blockCoords[0]) + (self.blockCoords[3] - self.blockCoords[1])
-        d2 = (state.blockCoords[2] - state.blockCoords[0]) + (state.blockCoords[3] - state.blockCoords[1])
+    def __hash__(self):
+        return hash(repr(self))
+
+    def distance(self, coords1, coords2):
+        return (coords2[0] - coords1[0]) + (coords2[1] - coords1[1])
+
+    def __lt__(self, other):
+        
+        d1 = self.distance(
+            [self.blockCoords[0], self.blockCoords[1]], self.solutionCoords)
+        d2 = self.distance(
+            [self.blockCoords[2], self.blockCoords[3]], self.solutionCoords)
+
+        ds = d1 if d1 < d2 else d2
+
+        d3 = self.distance(
+            [other.blockCoords[0], other.blockCoords[1]], other.solutionCoords)
+        d4 = self.distance(
+            [other.blockCoords[2], other.blockCoords[3]], other.solutionCoords)
+
+        do = d3 if d3 < d4 else d4
 
         if not self.togglers:
-            return d1 < d2
-        else:
-            num1 = 0
-            num2 = 0
+            return ds < do
 
-            for key in self.togglers:
-                if self.togglers[key]:
-                    num1+=1
-            
-            for key in state.togglers:
-                if state.togglers[key]:
-                    num2+=1
-                    
-            if num1 == 0 and num2 == 0:
-                if len(self.togglers) == 1:
-                    (x1,y1) = getCoords(self.board, state.togglers.keys[0])
-                    (x2,y2) = getCoords(state.board, state.togglers.keys[0])
-
-
-            return d1 < d2 if num1 == num2 else num1 > num2
 
 def getCoords(board, block):
     for i in range(len(board)):
         for j in range(len(board[0])):
             if board[i][j] == block:
                 return (i, j)
+
 
 def getInitialState(init_board):
     blockCoords = []
@@ -127,8 +132,9 @@ def getInitialState(init_board):
 
     return State(blockCoords, solutionCoords, board, togglers)
 
+
 class BloxorzProblem(Problem):
-    
+
     def __init__(self, initial):
         self.initial = copy.copy(initial)
         Problem.__init__(self, self.initial)
@@ -199,7 +205,7 @@ class BloxorzProblem(Problem):
                 nextBlockCoords[4] = "V"
             else:
                 nextBlockCoords[1] -= 1
-                nextBlockCoords[3] -= 1    
+                nextBlockCoords[3] -= 1
 
         return nextBlockCoords
 
@@ -242,13 +248,15 @@ class BloxorzProblem(Problem):
         return togglers
 
     def result(self, state, action):
-        
+
         nextState = copy.copy(state)
 
         possibleActions = ['Up', 'Down', 'Left', 'Right']
-        resultCheckers = [self.resultUp, self.resultDown, self.resultLeft, self.resultRight]
+        resultCheckers = [self.resultUp, self.resultDown,
+                          self.resultLeft, self.resultRight]
 
-        nextState.blockCoords = resultCheckers[possibleActions.index(action)](state.blockCoords)
+        nextState.blockCoords = resultCheckers[possibleActions.index(action)](
+            state.blockCoords)
         nextState.togglers = self.checkTogglers(nextState)
         return nextState
 
@@ -259,7 +267,6 @@ class BloxorzProblem(Problem):
 
         return True if blockCoords[4] == "V" and blockCoords[0] == solutionCoords[0] and blockCoords[1] == solutionCoords[1] else False
 
-
     def isValid(self, state, i0, j0, i1, j1):
 
         board = state.board
@@ -267,9 +274,9 @@ class BloxorzProblem(Problem):
         togglers = state.togglers
 
         piece1 = board[blockCoords[0] +
-                             i0][blockCoords[1] + j0]
+                       i0][blockCoords[1] + j0]
         piece2 = board[blockCoords[2] +
-                             i1][blockCoords[3] + j1]
+                       i1][blockCoords[3] + j1]
 
         if piece1 in togglers:
             if piece2 in togglers:
@@ -352,13 +359,13 @@ class BloxorzProblem(Problem):
         return False
 
     def validateRight(self, state):
-        
+
         blockCoords = state.blockCoords
         board = state.board
         togglers = state.togglers
 
         length = len(board[0])
-       
+
         if blockCoords[4] == "V":
             if blockCoords[3] + 2 < length and self.isValid(state, 0, 1, 0, 2):
                 return True
@@ -376,8 +383,10 @@ class BloxorzProblem(Problem):
 
     def validate(self, action, state):
         actions = ['Up', 'Down', 'Left', 'Right']
-        validators = [self.validateUp, self.validateDown, self.validateLeft, self.validateRight]
+        validators = [self.validateUp, self.validateDown,
+                      self.validateLeft, self.validateRight]
         return validators[actions.index(action)](state)
+
 
 def fileToLevel(lines):
     print("to implement")
@@ -405,4 +414,3 @@ def evaluateState(level):
 
 def testSolution(level):
     print("to implement")
-

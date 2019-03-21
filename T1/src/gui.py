@@ -145,7 +145,7 @@ class BloxorzUI(tk.Frame):
         duration = end - start
 
         actions = goalNode.solution()
-
+        print(actions)
         self.solveAnim(actions)
 
         tk.Label(self, text="Statistics").pack()
@@ -198,7 +198,8 @@ class BloxorzUI(tk.Frame):
 
         for action in solution:
             print(self.game.state.togglers)
-            self.game.move(action)
+            self.numMovements.set(str(self.game.move(action)))
+
             self.__draw_grid()
             self.update()
             time.sleep(0.5)
