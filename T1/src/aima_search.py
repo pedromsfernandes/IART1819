@@ -228,20 +228,42 @@ def depth_first_graph_search(problem):
 
     global numNodes
 
+    # counter = 0
+
     frontier = [(Node(problem.initial))]  # Stack
 
     explored = set()
     while frontier:
+
         node = frontier.pop()
+
         if problem.goal_test(node.state):
             nodes = numNodes
             numNodes = 0
             return (node, nodes)
-        explored.add(node.state)
+
+        if not areSameCoords(node.state.blockCoords,explored):
+            explored.add(node.state)
+
         frontier.extend(child for child in node.expand(problem)
                         if child.state not in explored and
                         child not in frontier)
+
+        sol = []
+        
+        for elem in frontier:
+            if not areSameCoords(elem.state.blockCoords, explored):
+                sol.append(elem)
+
+        frontier = sol
+
     return None
+
+def areSameCoords(coords, explored):
+    for state in explored:
+        exp = state.blockCoords
+        if(exp[0] == coords[0] and exp[1] == coords[1] and exp[2] == coords[2] and exp[3] == coords[3] and exp[4] == coords[4]):
+            return True; return False
 
 
 def breadth_first_graph_search(problem):

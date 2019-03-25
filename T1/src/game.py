@@ -76,7 +76,7 @@ class State:
         self.togglers = togglers
 
     def __eq__(self, other):
-        return self.blockCoords == other.blockCoords and self.solutionCoords == other.solutionCoords and self.board == other.board and self.togglers == other.togglers
+        return self.blockCoords[0] == other.blockCoords[0] and self.blockCoords[4] == other.blockCoords[4] and self.blockCoords[1] == other.blockCoords[1] and self.blockCoords[2] == other.blockCoords[2] and self.blockCoords[3] == other.blockCoords[3] and self.solutionCoords == other.solutionCoords and self.board == other.board and self.togglers == other.togglers
 
     def __hash__(self):
         return hash(repr(self))
