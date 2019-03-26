@@ -440,7 +440,10 @@ def bidirectional_search(problem):
 # Informed (Heuristic) Search
 
 
-greedy_best_first_graph_search = best_first_graph_search
+def greedy_best_first_graph_search(problem, h=None):
+    h = memoize(h or problem.h, 'h')
+    return best_first_graph_search(problem, lambda n: h(n))
+    
 # Greedy best-first search is accomplished by specifying f(n) = h(n).
 
 

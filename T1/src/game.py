@@ -1,7 +1,7 @@
 from array import *
 from aima_search import Problem
 import copy
-from aima_search import uniform_cost_search, depth_first_graph_search, breadth_first_graph_search, iterative_deepening_search, greedy_best_first_graph_search
+from aima_search import uniform_cost_search, depth_first_graph_search, breadth_first_graph_search, iterative_deepening_search, greedy_best_first_graph_search, astar_search
 
 
 class BloxorzBoard(object):
@@ -31,14 +31,15 @@ class BloxorzGame(object):
         self.state = getInitialState(self.start_board)
         self.problem = BloxorzProblem(self.state)
 
-        self.reservedLetters = ["X", "E", "O", "A"]
+        self.reservedLetters = ["X", "E", "O"]
 
         self.algorithms = {
             "DFS": depth_first_graph_search,
             "BFS": breadth_first_graph_search,
             "UCS": uniform_cost_search,
             "IDDFS": iterative_deepening_search,
-            "GS": greedy_best_first_graph_search
+            "GS": greedy_best_first_graph_search,
+            "A*": astar_search
         }
 
         self.numMovements = 0
@@ -85,7 +86,7 @@ class State:
         return (coords2[0] - coords1[0]) + (coords2[1] - coords1[1])
 
     def __lt__(self, other):
-        
+
         d1 = self.distance(
             [self.blockCoords[0], self.blockCoords[1]], self.solutionCoords)
         d2 = self.distance(
@@ -234,7 +235,7 @@ class BloxorzProblem(Problem):
         blockCoords = state.blockCoords
         togglers = state.togglers
 
-        reservedLetters = ["X", "E", "O", "A"]
+        reservedLetters = ["X", "E", "O"]
         block1 = board[blockCoords[0]][blockCoords[1]]
         block2 = board[blockCoords[2]][blockCoords[3]]
 
@@ -386,6 +387,12 @@ class BloxorzProblem(Problem):
         validators = [self.validateUp, self.validateDown,
                       self.validateLeft, self.validateRight]
         return validators[actions.index(action)](state)
+
+    def h(self, node):
+        x1, y1, t, z, s = node.state.blockCoords
+        x2, y2 = self.initial.solutionCoords
+
+        return abs(x2 - x1) + abs(y2 - y1)
 
 
 def fileToLevel(lines):
