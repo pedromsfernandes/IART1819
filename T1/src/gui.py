@@ -100,7 +100,7 @@ class BloxorzUI(tk.Frame):
         self.controller = controller
         self.parent = parent
 
-        self.algorithms = ["GS","BFS", "UCS", "A*", "IDDFS","GS"]
+        self.algorithms = ["DFS","BFS", "UCS", "A*", "IDDFS","GS"]
         self.i = 0
         tk.Frame.__init__(self, parent)
 
