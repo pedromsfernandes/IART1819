@@ -125,4 +125,28 @@
 [ ] 21 -  
 [ ] 22 -  
 
-greedy da sempre erro?
+
+## A*:  
+### Niveis resolvidos:  
+[X] 1 -  
+[X] 2 -  
+[X] 3 -  
+[X] 4 -  
+[X] 5 -  
+[X] 6 -  
+[X] 7 -  
+[X] 8 -  
+[X] 9 -  
+[X] 10-  
+[X] 11 -  
+[ ] 12 - foi para fora do mapa  
+[X] 13 -  
+[X] 14 -  
+[ ] 15 - nao chega a resposta certa  
+[X] 16 -  
+[ ] 17 - nao chega a reposta certa  
+[X] 18 -  
+[X] 19 -  
+[ ] 20 - resposta errada  
+[ ] 21 - loop infinito no inicio  
+[X] 22 -  
