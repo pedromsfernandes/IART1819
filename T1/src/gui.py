@@ -197,7 +197,6 @@ class BloxorzUI(tk.Frame):
     def solveAnim(self, solution):
 
         for action in solution:
-            print(self.game.state.togglers)
             self.numMovements.set(str(self.game.move(action)))
 
             self.__draw_grid()

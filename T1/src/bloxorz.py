@@ -12,11 +12,6 @@ def main():
     app = Bloxorz()
     app.mainloop()
 
-    # state = loadInitialState("../res/levels/level" + str(20) + ".txt")
-    # problem = BloxorzProblem(state)
-
-    # print(uniform_cost_search(problem).solution())
-
 
 if __name__ == "__main__":
     main()

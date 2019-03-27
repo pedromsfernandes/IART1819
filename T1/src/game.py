@@ -31,7 +31,7 @@ class BloxorzGame(object):
         self.state = getInitialState(self.start_board)
         self.problem = BloxorzProblem(self.state)
 
-        self.reservedLetters = ["X", "E", "O"]
+        self.reservedLetters = ["X", "E", "O", "V"]
 
         self.algorithms = {
             "DFS": depth_first_graph_search,
@@ -58,7 +58,6 @@ class BloxorzGame(object):
         return self.algorithms[algorithm](self.problem)
 
     def move(self, action):
-
         if self.problem.validate(action, self.state):
             self.state = self.problem.result(self.state, action)
             self.numMovements += 1
@@ -146,7 +145,7 @@ class BloxorzProblem(Problem):
     def actions(self, state):
         possibleActions = ['Up', 'Down', 'Left', 'Right']
         validActions = []
-
+        
         for action in possibleActions:
             if self.validate(action, state):
                 validActions.append(action)
@@ -233,9 +232,9 @@ class BloxorzProblem(Problem):
 
         board = state.board
         blockCoords = state.blockCoords
-        togglers = state.togglers
+        togglers = copy.copy(state.togglers)
 
-        reservedLetters = ["X", "E", "O"]
+        reservedLetters = ["X", "E", "O", "V"]
         block1 = board[blockCoords[0]][blockCoords[1]]
         block2 = board[blockCoords[2]][blockCoords[3]]
 
@@ -282,12 +281,12 @@ class BloxorzProblem(Problem):
         if piece1 in togglers:
             if piece2 in togglers:
                 return togglers[piece1] and togglers[piece2]
-            return togglers[piece1]
+            return togglers[piece1] and piece2 != "E"
 
         if piece2 in togglers:
             if piece1 in togglers:
                 return togglers[piece1] and togglers[piece2]
-            return togglers[piece2]
+            return togglers[piece2] and piece1 != "E"   
 
         if piece1 != "E" and piece2 != "E":
             return True
