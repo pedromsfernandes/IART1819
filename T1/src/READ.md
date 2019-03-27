@@ -11,16 +11,16 @@
 [X] 9 -  
 [X] 10-  
 [X] 11 -  
-[ ] 12 - resolve mas o bloco sai fora do mapa - interaçao com o toggler  
-[ ] 13 - erro  
+[X] 12 -   
+[X] 13 -   
 [X] 14 -  
-[ ] 15 - erro  
+[ ] 15 - fica encurralado  
 [X] 16 -  
-[ ] 17 - erro  
-[ ] 18 - erro  
+[X] 17 -   
+[ ] 18 - fica encurralado  
 [X] 19 -  
-[ ] 20 - erro em que o bloco pensa que toggler ja esta ativo/passa por zonas ilegais  
-[ ] 21 - comportamento semelhante ao anterior  
+[X] 20 -   
+[ ] 21 - fica encurralado  
 [X] 22 -  
 
 ## BFS:  
