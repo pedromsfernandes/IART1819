@@ -99,7 +99,7 @@ class BloxorzUI(tk.Frame):
         self.controller = controller
         self.parent = parent
 
-        self.algorithms = ["DFS","BFS", "UCS", "A*", "IDDFS","GS"]
+        self.algorithms = ["DFS", "BFS", "UCS", "A*", "IDDFS", "GS"]
         self.i = 0
         tk.Frame.__init__(self, parent)
 
@@ -229,12 +229,11 @@ class BloxorzUI(tk.Frame):
                 if place in self.colors:
                     color = self.colors[place]
                 elif place.isupper():
-                    if place < "G":
-                        color = "orange"
-                    else:
-                        color = "yellow"
+                    color = "orange" if place < "G" else "yellow"
                 elif place.islower():
                     color = "green" if self.game.state.togglers[place] else "gray"
+                elif place.isnumeric():
+                    color = "black" if int(place) % 2 == 0 else "purple"
                 else:
                     color = "gray"
 

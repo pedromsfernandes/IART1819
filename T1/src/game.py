@@ -69,11 +69,12 @@ class BloxorzGame(object):
 
 
 class State:
-    def __init__(self, blockCoords, solutionCoords, board, togglers):
+    def __init__(self, blockCoords, solutionCoords, board, togglers, teleport):
         self.blockCoords = blockCoords
         self.solutionCoords = solutionCoords
         self.board = board
         self.togglers = togglers
+        self.teleport = teleport
 
     def __eq__(self, other):
         return self.blockCoords[0] == other.blockCoords[0] and self.blockCoords[4] == other.blockCoords[4] and self.blockCoords[1] == other.blockCoords[1] and self.blockCoords[2] == other.blockCoords[2] and self.blockCoords[3] == other.blockCoords[3] and self.solutionCoords == other.solutionCoords and self.board == other.board and self.togglers == other.togglers
@@ -116,6 +117,7 @@ def getInitialState(init_board):
     solutionCoords = []
     board = []
     togglers = {}
+    teleport = {}
 
     for i in range(len(init_board)):
         board.append([])
@@ -128,9 +130,14 @@ def getInitialState(init_board):
                 solutionCoords = [i, j]
             elif init_board[i][j].islower():
                 togglers[init_board[i][j]] = False
+            elif init_board[i][j].isdigit() and int(init_board[i][j]) % 2 == 0:
+                teleport[init_board[i][j]] = [i, j]
+
             board[i].append(init_board[i][j])
 
-    return State(blockCoords, solutionCoords, board, togglers)
+    print(teleport)
+
+    return State(blockCoords, solutionCoords, board, togglers, teleport)
 
 
 class BloxorzProblem(Problem):
@@ -145,86 +152,127 @@ class BloxorzProblem(Problem):
     def actions(self, state):
         possibleActions = ['Up', 'Down', 'Left', 'Right']
         validActions = []
-        
+
         for action in possibleActions:
             if self.validate(action, state):
                 validActions.append(action)
 
         return validActions
 
-    def resultUp(self, blockCoords):
+    def resultUp(self, state):
 
-        nextBlockCoords = blockCoords.copy()
+        nextBlockCoords = state.blockCoords.copy()
 
-        if blockCoords[4] == "V":
+        if nextBlockCoords[4] == "V":
             nextBlockCoords[0] -= 2
             nextBlockCoords[2] -= 1
             nextBlockCoords[4] = "H"
-        elif blockCoords[4] == "H":
-            if blockCoords[0] == blockCoords[2]:
+        elif nextBlockCoords[4] == "H":
+
+            if nextBlockCoords[0] == nextBlockCoords[2]:
                 nextBlockCoords[0] -= 1
                 nextBlockCoords[2] -= 1
             else:
-                nextBlockCoords[0] -= 1
-                nextBlockCoords[2] -= 2
-                nextBlockCoords[4] = "V"
+                piece = state.board[nextBlockCoords[0] - 1][nextBlockCoords[1]]
+
+                if piece.isnumeric() and int(piece) % 2 == 1:
+                    key = str(int(piece) + 1)
+                    nextBlockCoords[0] = state.teleport[key][0]
+                    nextBlockCoords[1] = state.teleport[key][1]
+                    nextBlockCoords[2] = state.teleport[key][0]
+                    nextBlockCoords[3] = state.teleport[key][1]
+                    nextBlockCoords[4] = "V"
+                else:
+                    nextBlockCoords[0] -= 1
+                    nextBlockCoords[2] -= 2
+                    nextBlockCoords[4] = "V"
 
         return nextBlockCoords
 
-    def resultDown(self, blockCoords):
+    def resultDown(self, state):
 
-        nextBlockCoords = blockCoords.copy()
+        nextBlockCoords = state.blockCoords.copy()
 
-        if blockCoords[4] == "V":
+        if nextBlockCoords[4] == "V":
             nextBlockCoords[0] += 1
             nextBlockCoords[2] += 2
             nextBlockCoords[4] = "H"
-        elif blockCoords[4] == "H":
-            if blockCoords[0] == blockCoords[2]:
+        elif nextBlockCoords[4] == "H":
+            if nextBlockCoords[0] == nextBlockCoords[2]:
                 nextBlockCoords[0] += 1
                 nextBlockCoords[2] += 1
             else:
-                nextBlockCoords[0] += 2
-                nextBlockCoords[2] += 1
-                nextBlockCoords[4] = "V"
+                piece = state.board[nextBlockCoords[0] + 2][nextBlockCoords[1]]
+                if piece.isnumeric() and int(piece) % 2 == 1:
+                    key = str(int(piece) + 1)
+                    nextBlockCoords[0] = state.teleport[key][0]
+                    nextBlockCoords[1] = state.teleport[key][1]
+                    nextBlockCoords[2] = state.teleport[key][0]
+                    nextBlockCoords[3] = state.teleport[key][1]
+                    nextBlockCoords[4] = "V"
+                else:
+                    nextBlockCoords[0] += 2
+                    nextBlockCoords[2] += 1
+                    nextBlockCoords[4] = "V"
 
         return nextBlockCoords
 
-    def resultLeft(self, blockCoords):
+    def resultLeft(self, state):
 
-        nextBlockCoords = blockCoords.copy()
+        nextBlockCoords = state.blockCoords.copy()
 
-        if blockCoords[4] == "V":
+        if nextBlockCoords[4] == "V":
             nextBlockCoords[1] -= 2
             nextBlockCoords[3] -= 1
             nextBlockCoords[4] = "H"
-        elif blockCoords[4] == "H":
-            if blockCoords[0] == blockCoords[2]:
-                nextBlockCoords[1] -= 1
-                nextBlockCoords[3] -= 2
-                nextBlockCoords[4] = "V"
-            else:
+        elif nextBlockCoords[4] == "H":
+
+            if nextBlockCoords[0] != nextBlockCoords[2]:
                 nextBlockCoords[1] -= 1
                 nextBlockCoords[3] -= 1
+            else:
+                piece = state.board[nextBlockCoords[0]][nextBlockCoords[1] - 1]
+
+                if piece.isnumeric() and int(piece) % 2 == 1:
+                    key = str(int(piece) + 1)
+                    nextBlockCoords[0] = state.teleport[key][0]
+                    nextBlockCoords[1] = state.teleport[key][1]
+                    nextBlockCoords[2] = state.teleport[key][0]
+                    nextBlockCoords[3] = state.teleport[key][1]
+                    nextBlockCoords[4] = "V"
+                else:
+                    nextBlockCoords[1] -= 1
+                    nextBlockCoords[3] -= 2
+                    nextBlockCoords[4] = "V"
 
         return nextBlockCoords
 
-    def resultRight(self, blockCoords):
+    def resultRight(self, state):
 
-        nextBlockCoords = blockCoords.copy()
+        nextBlockCoords = state.blockCoords.copy()
 
-        if blockCoords[4] == "V":
+        if nextBlockCoords[4] == "V":
             nextBlockCoords[1] += 1
             nextBlockCoords[3] += 2
             nextBlockCoords[4] = "H"
-        elif blockCoords[4] == "H":
-            if blockCoords[0] == blockCoords[2]:
-                nextBlockCoords[1] += 2
-                nextBlockCoords[3] += 1
-                nextBlockCoords[4] = "V"
-            else:
+        elif nextBlockCoords[4] == "H":
+            if nextBlockCoords[0] != nextBlockCoords[2]:
                 nextBlockCoords[1] += 1
                 nextBlockCoords[3] += 1
+            else:
+                piece = state.board[nextBlockCoords[0]][nextBlockCoords[1] + 2]
+
+                if piece.isnumeric() and int(piece) % 2 == 1:
+                    key = str(int(piece) + 1)
+                    nextBlockCoords[0] = state.teleport[key][0]
+                    nextBlockCoords[1] = state.teleport[key][1]
+                    nextBlockCoords[2] = state.teleport[key][0]
+                    nextBlockCoords[3] = state.teleport[key][1]
+                    nextBlockCoords[4] = "V"
+                else:
+                    nextBlockCoords[1] += 2
+                    nextBlockCoords[3] += 1
+                    nextBlockCoords[4] = "V"
 
         return nextBlockCoords
 
@@ -256,7 +304,7 @@ class BloxorzProblem(Problem):
                           self.resultLeft, self.resultRight]
 
         nextState.blockCoords = resultCheckers[possibleActions.index(action)](
-            state.blockCoords)
+            state)
         nextState.togglers = self.checkTogglers(nextState)
         return nextState
 
@@ -286,7 +334,7 @@ class BloxorzProblem(Problem):
         if piece2 in togglers:
             if piece1 in togglers:
                 return togglers[piece1] and togglers[piece2]
-            return togglers[piece2] and piece1 != "E"   
+            return togglers[piece2] and piece1 != "E"
 
         if piece1 != "E" and piece2 != "E":
             return True
@@ -385,6 +433,7 @@ class BloxorzProblem(Problem):
         actions = ['Up', 'Down', 'Left', 'Right']
         validators = [self.validateUp, self.validateDown,
                       self.validateLeft, self.validateRight]
+
         return validators[actions.index(action)](state)
 
     def h(self, node):
@@ -392,31 +441,3 @@ class BloxorzProblem(Problem):
         x2, y2 = self.initial.solutionCoords
 
         return abs(x2 - x1) + abs(y2 - y1)
-
-
-def fileToLevel(lines):
-    print("to implement")
-
-
-def displayLevel(level):
-    print("to implement")
-
-
-def validatePlay(level, play):
-    print("to implement")
-
-
-def makePlay(level, play):
-    print("to implement")
-
-
-def getAllPlays(level):
-    print("to implement")
-
-
-def evaluateState(level):
-    print("to implement")
-
-
-def testSolution(level):
-    print("to implement")
