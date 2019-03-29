@@ -6,8 +6,7 @@ from game import BloxorzGame
 import time
 
 MARGIN = 20  # Pixels around the board
-SIDE = 50  # Width of every board cell.
-WIDTH = HEIGHT = MARGIN * 2 + SIDE * 9  # Width and height of the whole board
+WIDTH = HEIGHT = MARGIN * 2 + 300  # Width and height of the whole board
 levelInt = 1
 
 
@@ -161,13 +160,13 @@ class BloxorzUI(tk.Frame):
     def __initUI(self, controller):
         numLines = len(self.game.start_board)
         numColumns = len(self.game.start_board[0])
-
+        self.SIDE = 300 / numColumns
         algorithm = tk.StringVar()
         algorithm.set(self.algorithms[self.i])
 
         self.canvas = tk.Canvas(self,
-                                width=MARGIN * 2 + SIDE * numColumns,
-                                height=MARGIN * 2 + SIDE * numLines)
+                                width=MARGIN * 2 + self.SIDE * numColumns,
+                                height=MARGIN * 2 + self.SIDE * numLines)
         self.canvas.pack(fill=tk.BOTH, side=tk.TOP)
 
         self.__draw_grid()
@@ -222,8 +221,8 @@ class BloxorzUI(tk.Frame):
 
         for i in range(numLines):
             for j in range(numColumns):
-                x1 = x0 + SIDE
-                y1 = y0 + SIDE
+                x1 = x0 + self.SIDE
+                y1 = y0 + self.SIDE
 
                 color = ""
                 place = self.game.state.board[i][j]
@@ -242,18 +241,18 @@ class BloxorzUI(tk.Frame):
                 self.canvas.create_rectangle(
                     x0, y0, x1, y1, fill=color)
 
-                x0 += SIDE
+                x0 += self.SIDE
             x0 = MARGIN
-            y0 += SIDE
+            y0 += self.SIDE
 
-        x0 = MARGIN + SIDE * self.game.state.blockCoords[1]
-        y0 = MARGIN + SIDE * self.game.state.blockCoords[0]
-
-        self.canvas.create_rectangle(
-            x0, y0, x0 + SIDE, y0 + SIDE, fill="blue")
-
-        x0 = MARGIN + SIDE * self.game.state.blockCoords[3]
-        y0 = MARGIN + SIDE * self.game.state.blockCoords[2]
+        x0 = MARGIN + self.SIDE * self.game.state.blockCoords[1]
+        y0 = MARGIN + self.SIDE * self.game.state.blockCoords[0]
 
         self.canvas.create_rectangle(
-            x0, y0, x0 + SIDE, y0 + SIDE, fill="blue")
+            x0, y0, x0 + self.SIDE, y0 + self.SIDE, fill="blue")
+
+        x0 = MARGIN + self.SIDE * self.game.state.blockCoords[3]
+        y0 = MARGIN + self.SIDE * self.game.state.blockCoords[2]
+
+        self.canvas.create_rectangle(
+            x0, y0, x0 + self.SIDE, y0 + self.SIDE, fill="blue")
