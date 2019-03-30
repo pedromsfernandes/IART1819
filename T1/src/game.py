@@ -31,7 +31,7 @@ class BloxorzGame(object):
         self.state = getInitialState(self.start_board)
         self.problem = BloxorzProblem(self.state)
 
-        self.reservedLetters = ["X", "E", "O", "V"]
+        self.reservedLetters = ["X", "E", "O", "V", "F"]
 
         self.algorithms = {
             "DFS": depth_first_graph_search,
@@ -282,7 +282,7 @@ class BloxorzProblem(Problem):
         blockCoords = state.blockCoords
         togglers = copy.copy(state.togglers)
 
-        reservedLetters = ["X", "E", "O", "V"]
+        reservedLetters = ["X", "E", "O", "V", "F"]
         block1 = board[blockCoords[0]][blockCoords[1]]
         block2 = board[blockCoords[2]][blockCoords[3]]
 
@@ -358,7 +358,7 @@ class BloxorzProblem(Problem):
             if piece in togglers:
                 return togglers[piece]
 
-            return True if blockCoords[0] - 1 >= 0 and piece != "E" else False
+            return True if blockCoords[0] - 1 >= 0 and piece != "E" and piece != "F" else False
 
         return False
 
@@ -381,7 +381,7 @@ class BloxorzProblem(Problem):
             if piece in togglers:
                 return togglers[piece]
 
-            return True if blockCoords[0] + 1 < length and piece != "E" else False
+            return True if blockCoords[0] + 1 < length and piece != "E" and piece != "F" else False
 
         return False
 
@@ -399,7 +399,7 @@ class BloxorzProblem(Problem):
             if piece in togglers:
                 return togglers[piece]
 
-            return True if blockCoords[1] - 1 >= 0 and piece != "E" else False
+            return True if blockCoords[1] - 1 >= 0 and piece != "E" and piece != "F" else False
         else:
             if blockCoords[1] - 1 >= 0 and self.isValid(state, 0, -1, 0, -1):
                 return True
@@ -422,7 +422,7 @@ class BloxorzProblem(Problem):
             if piece in togglers:
                 return togglers[piece]
 
-            return True if blockCoords[3] + 1 < length and piece != "E" else False
+            return True if blockCoords[3] + 1 < length and piece != "E" and piece != "F" else False
         else:
             if blockCoords[3] + 1 < length and self.isValid(state, 0, 1, 0, 1):
                 return True

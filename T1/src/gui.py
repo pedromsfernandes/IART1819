@@ -108,6 +108,7 @@ class BloxorzUI(tk.Frame):
             "E": "gray",
             "O": "red",
             "X": "white",
+            "F": "gold",
         }
 
         self.keyToAction = {
