@@ -108,6 +108,7 @@ class BloxorzUI(tk.Frame):
             "E": "gray",
             "O": "red",
             "X": "white",
+            "F": "gold",
         }
 
         self.keyToAction = {
@@ -236,9 +237,22 @@ class BloxorzUI(tk.Frame):
                     color = "black" if int(place) % 2 == 0 else "purple"
                 else:
                     color = "gray"
-
+                
                 self.canvas.create_rectangle(
                     x0, y0, x1, y1, fill=color)
+
+                if place == '>':
+                    points = [x0, y0, x0, y1, x1, (y0 + y1)/2]
+                    self.canvas.create_polygon(points, fill="blue")
+                elif place == '<':
+                    points = [x1, y0, x1, y1, x0, (y0 + y1)/2]
+                    self.canvas.create_polygon(points, fill="blue")
+                elif place == '^':
+                    points = [x0, y1, x1, y1, (x0 + x1)/2, y0]
+                    self.canvas.create_polygon(points, fill="blue")
+                elif place == '_':
+                    points = [x0, y0, x1, y0, (x0 + x1)/2, y1]
+                    self.canvas.create_polygon(points, fill="blue")
 
                 x0 += self.SIDE
             x0 = MARGIN
