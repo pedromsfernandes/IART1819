@@ -440,4 +440,4 @@ class BloxorzProblem(Problem):
         x1, y1, t, z, s = node.state.blockCoords
         x2, y2 = self.initial.solutionCoords
 
-        return abs(x2 - x1) + abs(y2 - y1)
+        return (abs(x2 - x1) + abs(y2 - y1))*2/3
