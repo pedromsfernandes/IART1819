@@ -57,6 +57,13 @@ class Bloxorz(tk.Tk):
         frame = self.frames[page_name]
         frame.tkraise()
 
+    def showLegend(self):
+        legendFrame = Legend(self.container, self)
+        self.frames[Legend] = legendFrame
+        legendFrame.grid(row=0, column=0, sticky="nsew")
+
+        self.show_frame(Legend)
+
     def initGame(self):
         game = BloxorzGame("../res/levels/level" + str(levelInt) + ".txt")
 
@@ -66,6 +73,25 @@ class Bloxorz(tk.Tk):
 
         self.show_frame(BloxorzUI)
 
+
+class Legend(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+
+        tk.Label(self, text="Blue - Block", fg="blue").pack()
+        tk.Label(self, text="Red - Goal", fg="red").pack()
+        tk.Label(self, text="Orange - Toggler", fg="orange").pack()
+        tk.Label(self, text="Yellow - Vertical toggler", fg="yellow").pack()
+        tk.Label(self, text="White - Normal", fg="white").pack()
+        tk.Label(self, text="Gray - Empty", fg="gray").pack()
+        tk.Label(self, text="Green - Activated by toggler", fg="green").pack()
+        tk.Label(self, text="Black - Teleport: to", fg="black").pack()
+        tk.Label(self, text="Purple - Teleport: from", fg="purple").pack()
+        tk.Label(self, text="Gold - Fall if standing", fg="gold").pack()
+        
+        tk.Button(self, text="Exit",
+                  command=lambda: controller.show_frame(MainMenu)).pack()
 
 class MainMenu(tk.Frame):
     def __init__(self, parent, controller):
@@ -81,16 +107,16 @@ class MainMenu(tk.Frame):
 
         level = tk.StringVar()
         level.set(str(levelInt))
-        w = tk.Label(self, textvariable=level)
-        w.pack()
+        tk.Label(self, textvariable=level).pack()
         tk.Button(self, text="Previous", command=lambda: prevCallback(
             level, numLevels)).pack()
         tk.Button(self, text="Next", command=lambda: nextCallback(
             level, numLevels)).pack()
 
-        button2 = tk.Button(self, text="Play",
-                            command=lambda: controller.initGame())
-        button2.pack()
+        tk.Button(self, text="Play",
+                  command=lambda: controller.initGame()).pack()
+        tk.Button(self, text="Legend",
+                  command=lambda: controller.showLegend()).pack()
 
 
 class BloxorzUI(tk.Frame):
@@ -237,7 +263,7 @@ class BloxorzUI(tk.Frame):
                     color = "black" if int(place) % 2 == 0 else "purple"
                 else:
                     color = "gray"
-                
+
                 self.canvas.create_rectangle(
                     x0, y0, x1, y1, fill=color)
 
