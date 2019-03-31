@@ -242,7 +242,7 @@ def depth_first_graph_search(problem):
             numNodes = 0
             return (node, nodes)
 
-        if not areSameCoords(node.state.blockCoords,explored):
+        if not areSameCoords(node.state,explored):
             explored.add(node.state)
 
         frontier.extend(child for child in node.expand(problem)
@@ -252,17 +252,18 @@ def depth_first_graph_search(problem):
         sol = []
         
         for elem in frontier:
-            if not areSameCoords(elem.state.blockCoords, explored):
+            if not areSameCoords(elem.state, explored):
                 sol.append(elem)
 
         frontier = sol
 
     return None
 
-def areSameCoords(coords, explored):
+def areSameCoords(arg, explored):
+    coords = arg.blockCoords
     for state in explored:
         exp = state.blockCoords
-        if(exp[0] == coords[0] and exp[1] == coords[1] and exp[2] == coords[2] and exp[3] == coords[3] and exp[4] == coords[4]):
+        if(exp[0] == coords[0] and exp[1] == coords[1] and exp[2] == coords[2] and exp[3] == coords[3] and exp[4] == coords[4]) and arg.teleport == state.teleport and arg.togglers == state.togglers:
             return True; return False
 
 
