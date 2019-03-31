@@ -51,9 +51,12 @@ class BloxorzGame(object):
         (goalNode, node) = self.algorithms[algorithm](self.problem)
         return goalNode.solution()[0]
 
-    def solve(self, algorithm):
+    def solve(self, algorithm, h=None):
         currState = copy.deepcopy(self.state)
         self.problem.setState(currState)
+
+        if algorithm == "A*":
+            return self.algorithms[algorithm](self.problem, h)
 
         return self.algorithms[algorithm](self.problem)
 
@@ -493,8 +496,14 @@ class BloxorzProblem(Problem):
 
         return validators[actions.index(action)](state)
 
-    def h(self, node):
-        x1, y1, t, z, s = node.state.blockCoords
-        x2, y2 = self.initial.solutionCoords
+def h1(node):
+    x1, y1, t, z, s = node.state.blockCoords
+    x2, y2 = node.state.solutionCoords
 
-        return (abs(x2 - x1) + abs(y2 - y1))*2/3
+    return (abs(x2 - x1) + abs(y2 - y1))
+
+def h2(node):
+    x1, y1, t, z, s = node.state.blockCoords
+    x2, y2 = node.state.solutionCoords
+
+    return (abs(x2 - x1) + abs(y2 - y1))*2/3

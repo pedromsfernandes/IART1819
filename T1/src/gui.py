@@ -2,7 +2,7 @@ from utils import getNumLevels
 
 import tkinter as tk                # python 3
 from tkinter import font as tkfont  # python 3
-from game import BloxorzGame
+from game import BloxorzGame, h2
 import time
 
 MARGIN = 20  # Pixels around the board
@@ -166,7 +166,7 @@ class BloxorzUI(tk.Frame):
 
     def solve(self):
         start = time.time()
-        (goalNode, numNodes) = self.game.solve(self.algorithms[self.i])
+        (goalNode, numNodes) = self.game.solve(self.algorithms[self.i], h2)
         end = time.time()
         duration = end - start
 

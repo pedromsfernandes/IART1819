@@ -3,7 +3,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 
 from utils import getNumLevels
-from game import BloxorzGame
+from game import BloxorzGame, h1, h2
 import time
 
 
@@ -23,36 +23,41 @@ sheet = client.open("bloxor").get_worksheet(2)
 #sheet.update_cell(4, 5, "I just wrote to a spreadsheet using Python!")
 
 
+algorithms = ["DFS", "BFS", "UCS", "IDDFS", "GS", "A*", "A*"]
 
-algorithms = ["DFS","BFS", "UCS", "A*", "IDDFS","GS"]
 
+for alg in range(1, len(algorithms) + 1):  # algoritmo
 
-for alg in range(1,6): #algoritmo
+    if alg == 4:
+        continue
 
     sheet = client.open("bloxor").get_worksheet(alg-1)
     print("ja abriu ", alg-1)
-    for i in range(1,23): #niveis
+    for i in range(1, getNumLevels() + 1):  # niveis
 
         avg = 0
         max = 0
         min = 99999
 
-        for j in range(1,8): #ensaios
-
-            # niveis que nao correm
-            if alg == 1 and (i == 15 or i == 18 or i == 21):
-                continue
+        for j in range(1, 8):  # ensaios
 
             game = BloxorzGame("../res/levels/level" + str(i) + ".txt")
             start = time.time()
-            (goalNode, numNodes) = game.solve(algorithms[alg-1])
+
+            if alg - 1 == 5:
+                (goalNode, numNodes) = game.solve(algorithms[alg-1], h1)
+
+            elif alg - 1 == 6:
+                (goalNode, numNodes) = game.solve(algorithms[alg-1], h2)
+            else:
+                (goalNode, numNodes) = game.solve(algorithms[alg-1])
             end = time.time()
             duration = end - start
             avg = avg + duration
 
             if duration > max:
                 max = duration
-            
+
             if duration < min:
                 min = duration
 
@@ -64,13 +69,13 @@ for alg in range(1,6): #algoritmo
 
             if j == 1:
                 time.sleep(1)
-                sheet.update_cell(x, 2,solLen)
+                sheet.update_cell(x, 2, solLen)
                 time.sleep(1)
-                sheet.update_cell(x,3,numNodes)
+                sheet.update_cell(x, 3, numNodes)
 
             time.sleep(1)
-            sheet.update_cell(x,5,duration)
+            sheet.update_cell(x, 5, duration)
 
             if j == 7:
                 time.sleep(1)
-                sheet.update_cell(x-6,6,(avg-max-min)/5)
+                sheet.update_cell(x-6, 6, (avg-max-min)/5)
