@@ -7,10 +7,15 @@ import time
 
 MARGIN = 20  # Pixels around the board
 WIDTH = HEIGHT = MARGIN * 2 + 300  # Width and height of the whole board
-levelInt = 1
 
 
-def nextCallback(level, numLevels):
+levelInt = 1 # The level currently chosen by the user
+
+"""
+Callback used when the user presses the next level button. Updates the levelInt variable,
+so that the user knows what level he is currently choosing.
+"""
+def nextLevelCallback(level, numLevels):
     global levelInt
     if levelInt < numLevels:
         levelInt += 1
@@ -19,7 +24,11 @@ def nextCallback(level, numLevels):
     level.set(str(levelInt))
 
 
-def prevCallback(level, numLevels):
+"""
+Callback used when the user presses the previous level button. Updates the levelInt variable,
+so that the user knows what level he is currently choosing.
+"""
+def prevLevelCallback(level, numLevels):
     global levelInt
     if levelInt > 1:
         levelInt -= 1
@@ -27,7 +36,9 @@ def prevCallback(level, numLevels):
         levelInt = numLevels
     level.set(str(levelInt))
 
-
+"""
+Main class for the GUI, responsible for holding references to each of the windows: main, legend and game.
+"""
 class Bloxorz(tk.Tk):
 
     def __init__(self, *args, **kwargs):
@@ -46,6 +57,8 @@ class Bloxorz(tk.Tk):
 
         self.frames = {}
 
+        # Initialize main menu frame and show it
+
         mainMenuFrame = MainMenu(self.container, self)
         self.frames[MainMenu] = mainMenuFrame
         mainMenuFrame.grid(row=0, column=0, sticky="nsew")
@@ -57,6 +70,7 @@ class Bloxorz(tk.Tk):
         frame = self.frames[page_name]
         frame.tkraise()
 
+    # Initializes the legend frame and shows it
     def showLegend(self):
         legendFrame = Legend(self.container, self)
         self.frames[Legend] = legendFrame
@@ -64,6 +78,7 @@ class Bloxorz(tk.Tk):
 
         self.show_frame(Legend)
 
+    # Initializes the chosen level, and shows it
     def initGame(self):
         game = BloxorzGame("../res/levels/level" + str(levelInt) + ".txt")
 
@@ -74,6 +89,9 @@ class Bloxorz(tk.Tk):
         self.show_frame(BloxorzUI)
 
 
+"""
+Window used to illustrate the meaning of each color of the board to the user.
+"""
 class Legend(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -93,6 +111,9 @@ class Legend(tk.Frame):
         tk.Button(self, text="Exit",
                   command=lambda: controller.show_frame(MainMenu)).pack()
 
+"""
+Main menu. Allows the user to choose a level, to access the legend window, or leave.
+"""
 class MainMenu(tk.Frame):
     def __init__(self, parent, controller):
 
@@ -108,9 +129,9 @@ class MainMenu(tk.Frame):
         level = tk.StringVar()
         level.set(str(levelInt))
         tk.Label(self, textvariable=level).pack()
-        tk.Button(self, text="Previous", command=lambda: prevCallback(
+        tk.Button(self, text="Previous", command=lambda: prevLevelCallback(
             level, numLevels)).pack()
-        tk.Button(self, text="Next", command=lambda: nextCallback(
+        tk.Button(self, text="Next", command=lambda: nextLevelCallback(
             level, numLevels)).pack()
 
         tk.Button(self, text="Play",
@@ -118,7 +139,10 @@ class MainMenu(tk.Frame):
         tk.Button(self, text="Legend",
                   command=lambda: controller.showLegend()).pack()
 
-
+"""
+Window representing a level of the game. Shows the board and allows the user to choose an algorithm,
+solve the level or get a tip for the next movement, and also shows the statistics for the solution.
+"""
 class BloxorzUI(tk.Frame):
     def __init__(self, parent, controller, game):
         self.game = game
@@ -146,14 +170,14 @@ class BloxorzUI(tk.Frame):
 
         self.__initUI(controller)
 
-    def prevCallback(self, algorithm):
+    def prevAlgCallback(self, algorithm):
         if self.i > 0:
             self.i -= 1
         else:
             self.i = len(self.algorithms) - 1
         algorithm.set(self.algorithms[self.i])
 
-    def nextCallback(self, algorithm):
+    def nextAlgCallback(self, algorithm):
         if self.i < len(self.algorithms) - 1:
             self.i += 1
         else:
@@ -211,19 +235,16 @@ class BloxorzUI(tk.Frame):
 
         tk.Label(self, textvariable=algorithm).pack()
         tk.Button(self, text="Previous",
-                  command=lambda: self.prevCallback(algorithm)).pack()
+                  command=lambda: self.prevAlgCallback(algorithm)).pack()
         tk.Button(self, text="Next",
-                  command=lambda: self.nextCallback(algorithm)).pack()
+                  command=lambda: self.nextAlgCallback(algorithm)).pack()
 
         tk.Button(self, text="Exit",
                   command=lambda: controller.show_frame(MainMenu)).pack()
 
         self.canvas.bind("<Key>", self.key)
-        self.canvas.bind("<Button-1>", self.callback)
-
-    def validMove(self, initState, afterState):
-        print("todo")
-
+        self.canvas.bind("<Button-1>", self.mouse)
+    
     def solveAnim(self, solution):
 
         for action in solution:
@@ -234,15 +255,13 @@ class BloxorzUI(tk.Frame):
             time.sleep(0.5)
 
     def key(self, event):
-        print("pressed", repr(event.char))
         if not self.game.gameOver:
             self.numMovements.set(
                 str(self.game.move(self.keyToAction[event.char])))
             self.__draw_grid()
 
-    def callback(self, event):
+    def mouse(self, event):
         self.canvas.focus_set()
-        print("clicked at", event.x, event.y)
 
     def __draw_grid(self):
         numLines = len(self.game.start_board)

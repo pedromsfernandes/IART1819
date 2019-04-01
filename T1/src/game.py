@@ -4,6 +4,9 @@ import copy
 from aima_search import uniform_cost_search, depth_first_graph_search, breadth_first_graph_search, iterative_deepening_search, greedy_best_first_graph_search, astar_search
 import time
 
+"""
+Board class. Responsible for reading a file and storing the level in a double array.
+"""
 class BloxorzBoard(object):
     def __init__(self, board_file):
         self.board = self.__create_board(board_file)
@@ -23,7 +26,9 @@ class BloxorzBoard(object):
         file.close()
         return board
 
-
+"""
+Main game class, used by the GUI to effect the game board.
+"""
 class BloxorzGame(object):
 
     def __init__(self, board_file):
@@ -45,12 +50,20 @@ class BloxorzGame(object):
         self.numMovements = 0
         self.gameOver = False
 
+    """
+    Calls the given algorithm and returns the best next move needed to complete the level.
+    """
     def tip(self, algorithm):
         self.problem.setState(self.state)
 
         (goalNode, node) = self.algorithms[algorithm](self.problem)
         return goalNode.solution()[0]
 
+    """
+    Calls the given algorithm and returns the actions needed to solve the current level.
+    With this implementation, it allows to solve the level from any state: even if the user moves around and tries to solve
+    later, it will work.
+    """
     def solve(self, algorithm, h=None):
         currState = copy.deepcopy(self.state)
         self.problem.setState(currState)
@@ -58,6 +71,7 @@ class BloxorzGame(object):
         self.problem.startTime = time.time()
         print("devia dar")
 
+        # A* and GS are special, since they require a heuristic, h
         if algorithm == "A*" or algorithm == 'GS':
             answer = self.algorithms[algorithm](self.problem, h)
             if answer == None:
@@ -67,6 +81,11 @@ class BloxorzGame(object):
 
         return self.algorithms[algorithm](self.problem)
 
+    """
+    Checks if a move is valid, in which case performs it and checks if the state is final.
+    The action argument is one of ["Up", "Down", "Left", "Right"]
+    Returns the number of movements, in order for the GUI to be updated.
+    """
     def move(self, action):
         if self.problem.validate(action, self.state):
             self.state = self.problem.result(self.state, action)
@@ -77,7 +96,11 @@ class BloxorzGame(object):
 
         return self.numMovements
 
-
+"""
+State object, holding the game board, and useful information separately, such as
+the coordinates of the block, the coordinates of the solution, the state of togglers
+and teleporters (only existing in later levels).
+"""
 class State:
     def __init__(self, blockCoords, solutionCoords, board, togglers, teleport):
         self.blockCoords = blockCoords
@@ -86,6 +109,9 @@ class State:
         self.togglers = togglers
         self.teleport = teleport
 
+    """
+    Overload the == operator, comparing the content of each field.
+    """
     def __eq__(self, other):
         return self.blockCoords[0] == other.blockCoords[0] and self.blockCoords[4] == other.blockCoords[4] and self.blockCoords[1] == other.blockCoords[1] and self.blockCoords[2] == other.blockCoords[2] and self.blockCoords[3] == other.blockCoords[3] and self.solutionCoords == other.solutionCoords and self.board == other.board and self.togglers == other.togglers
 
@@ -95,6 +121,9 @@ class State:
     def distance(self, coords1, coords2):
         return (coords2[0] - coords1[0]) + (coords2[1] - coords1[1])
 
+    """
+    Overload the < operator. A state is considered less than another if it is closer to the solution.
+    """
     def __lt__(self, other):
 
         d1 = self.distance(
@@ -114,14 +143,9 @@ class State:
         if not self.togglers:
             return ds < do
 
-
-def getCoords(board, block):
-    for i in range(len(board)):
-        for j in range(len(board[0])):
-            if board[i][j] == block:
-                return (i, j)
-
-
+"""
+Returns the initial state of the level, by analyzing the result of reading the respective text file.
+"""
 def getInitialState(init_board):
     blockCoords = []
     solutionCoords = []
@@ -150,6 +174,9 @@ def getInitialState(init_board):
     return State(blockCoords, solutionCoords, board, togglers, teleport)
 
 
+"""
+Main game logic. Used both by the GUI and the search algorithms.
+"""
 class BloxorzProblem(Problem):
 
     def __init__(self, initial):
@@ -159,6 +186,9 @@ class BloxorzProblem(Problem):
     def setState(self, state):
         self.initial = copy.copy(state)
 
+    """
+    Returns all of the possible actions (movements) to take in the current state.
+    """
     def actions(self, state):
         possibleActions = ['Up', 'Down', 'Left', 'Right']
         validActions = []
@@ -169,6 +199,10 @@ class BloxorzProblem(Problem):
 
         return validActions
 
+
+    """
+    Returns the next coordinates of the block after the action Up.
+    """
     def resultUp(self, state):
 
         nextBlockCoords = state.blockCoords.copy()
@@ -213,6 +247,9 @@ class BloxorzProblem(Problem):
 
         return nextBlockCoords
 
+    """
+    Returns the next coordinates of the block after the action Down.
+    """
     def resultDown(self, state):
 
         nextBlockCoords = state.blockCoords.copy()
@@ -256,6 +293,9 @@ class BloxorzProblem(Problem):
 
         return nextBlockCoords
 
+    """
+    Returns the next coordinates of the block after the action Left.
+    """
     def resultLeft(self, state):
 
         nextBlockCoords = state.blockCoords.copy()
@@ -300,6 +340,10 @@ class BloxorzProblem(Problem):
 
         return nextBlockCoords
 
+
+    """
+    Returns the next coordinates of the block after the action Right.
+    """
     def resultRight(self, state):
 
         nextBlockCoords = state.blockCoords.copy()
@@ -343,6 +387,10 @@ class BloxorzProblem(Problem):
 
         return nextBlockCoords
 
+    """
+    Returns the next state of the togglers, checking if the block is pressing them, and (de)activating
+    the respective places.
+    """
     def checkTogglers(self, state):
 
         board = state.board
@@ -362,6 +410,9 @@ class BloxorzProblem(Problem):
 
         return togglers
 
+    """
+    Returns the next state of the game after a given action is taken. At this point it is assumed that the move is valid.
+    """
     def result(self, state, action):
 
         nextState = copy.copy(state)
@@ -375,6 +426,9 @@ class BloxorzProblem(Problem):
         nextState.togglers = self.checkTogglers(nextState)
         return nextState
 
+    """
+    Checks if the block is standing vertically upon the goal place.
+    """
     def goal_test(self, state):
 
         blockCoords = state.blockCoords
@@ -382,7 +436,11 @@ class BloxorzProblem(Problem):
 
         return True if blockCoords[4] == "V" and blockCoords[0] == solutionCoords[0] and blockCoords[1] == solutionCoords[1] else False
 
-    def isValid(self, state, i0, j0, i1, j1):
+    """
+    Checks if the pieces where the block would move are valid, in case there are togglers in this level.
+    In order to be valid, those pieces need to be activated, otherwise they're just empty.
+    """
+    def areTogglersValid(self, state, i0, j0, i1, j1):
 
         board = state.board
         blockCoords = state.blockCoords
@@ -408,6 +466,9 @@ class BloxorzProblem(Problem):
 
         return False
 
+    """
+    Checks if moving up is valid in the current state.
+    """
     def validateUp(self, state):
 
         blockCoords = state.blockCoords
@@ -415,10 +476,10 @@ class BloxorzProblem(Problem):
         togglers = state.togglers
 
         if blockCoords[4] == "V":
-            if blockCoords[0] - 2 >= 0 and self.isValid(state, -2, 0, -1, 0):
+            if blockCoords[0] - 2 >= 0 and self.areTogglersValid(state, -2, 0, -1, 0):
                 return True
         elif blockCoords[0] == blockCoords[2]:
-            if blockCoords[0] - 1 >= 0 and self.isValid(state, -1, 0, -1, 0):
+            if blockCoords[0] - 1 >= 0 and self.areTogglersValid(state, -1, 0, -1, 0):
                 return True
         else:
             piece = board[blockCoords[0] - 1][blockCoords[1]]
@@ -429,6 +490,9 @@ class BloxorzProblem(Problem):
 
         return False
 
+    """
+    Checks if moving down is valid in the current state.
+    """
     def validateDown(self, state):
 
         blockCoords = state.blockCoords
@@ -438,10 +502,10 @@ class BloxorzProblem(Problem):
         length = len(board)
 
         if blockCoords[4] == "V":
-            if blockCoords[0] + 2 < length and self.isValid(state, 2, 0, 1, 0):
+            if blockCoords[0] + 2 < length and self.areTogglersValid(state, 2, 0, 1, 0):
                 return True
         elif blockCoords[0] == blockCoords[2]:
-            if blockCoords[0] + 1 < length and self.isValid(state, 1, 0, 1, 0):
+            if blockCoords[0] + 1 < length and self.areTogglersValid(state, 1, 0, 1, 0):
                 return True
         elif blockCoords[0] + 2 < length:
             piece = board[blockCoords[0] + 2][blockCoords[1]]
@@ -452,6 +516,9 @@ class BloxorzProblem(Problem):
 
         return False
 
+    """
+    Checks if moving left is valid in the current state.
+    """
     def validateLeft(self, state):
 
         blockCoords = state.blockCoords
@@ -459,7 +526,7 @@ class BloxorzProblem(Problem):
         togglers = state.togglers
 
         if blockCoords[4] == "V":
-            if blockCoords[1] - 2 >= 0 and self.isValid(state, 0, -2, 0, -1):
+            if blockCoords[1] - 2 >= 0 and self.areTogglersValid(state, 0, -2, 0, -1):
                 return True
         elif blockCoords[0] == blockCoords[2]:
             piece = board[blockCoords[0]][blockCoords[1] - 1]
@@ -468,11 +535,14 @@ class BloxorzProblem(Problem):
 
             return True if blockCoords[1] - 1 >= 0 and piece != "E" and piece != "F" else False
         else:
-            if blockCoords[1] - 1 >= 0 and self.isValid(state, 0, -1, 0, -1):
+            if blockCoords[1] - 1 >= 0 and self.areTogglersValid(state, 0, -1, 0, -1):
                 return True
 
         return False
 
+    """
+    Checks if moving right is valid in the current state.
+    """
     def validateRight(self, state):
 
         blockCoords = state.blockCoords
@@ -482,7 +552,7 @@ class BloxorzProblem(Problem):
         length = len(board[0])
 
         if blockCoords[4] == "V":
-            if blockCoords[3] + 2 < length and self.isValid(state, 0, 1, 0, 2):
+            if blockCoords[3] + 2 < length and self.areTogglersValid(state, 0, 1, 0, 2):
                 return True
         elif blockCoords[0] == blockCoords[2] and blockCoords[1] + 2 < length:
             piece = board[blockCoords[0]][blockCoords[1] + 2]
@@ -491,11 +561,14 @@ class BloxorzProblem(Problem):
 
             return True if blockCoords[3] + 1 < length and piece != "E" and piece != "F" else False
         else:
-            if blockCoords[3] + 1 < length and self.isValid(state, 0, 1, 0, 1):
+            if blockCoords[3] + 1 < length and self.areTogglersValid(state, 0, 1, 0, 1):
                 return True
 
         return False
 
+    """
+    Checks if the given move is valid in the current state.
+    """
     def validate(self, action, state):
         actions = ['Up', 'Down', 'Left', 'Right']
         validators = [self.validateUp, self.validateDown,
@@ -503,12 +576,21 @@ class BloxorzProblem(Problem):
 
         return validators[actions.index(action)](state)
 
+"""
+First heuristic for the greedy and astar methods.
+Calculates the distance of the current node's block to the goal.
+"""
 def h1(node):
     x1, y1, t, z, s = node.state.blockCoords
     x2, y2 = node.state.solutionCoords
 
     return (abs(x2 - x1) + abs(y2 - y1))
 
+"""
+Second heuristic for the greedy and astar methods.
+Calculates an estimate for the number of moves necessary to cover the
+distance of the current node's block to the goal.
+"""
 def h2(node):
     x1, y1, t, z, s = node.state.blockCoords
     x2, y2 = node.state.solutionCoords
