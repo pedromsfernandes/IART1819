@@ -167,12 +167,16 @@ class BloxorzUI(tk.Frame):
     def solve(self):
         start = time.time()
         (goalNode, numNodes) = self.game.solve(self.algorithms[self.i], h2)
-        end = time.time()
-        duration = end - start
 
-        actions = goalNode.solution()
-        print(actions)
-        self.solveAnim(actions)
+        if goalNode == {} and numNodes == 73:
+            duration = 'TIMEOUT'
+            numNodes = 0
+        else:
+            end = time.time()
+            duration = end - start
+            actions = goalNode.solution()
+            print(actions)
+            self.solveAnim(actions)
 
         tk.Label(self, text="Statistics").pack()
         tk.Label(self, text="Expanded nodes").pack()

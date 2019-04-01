@@ -2,7 +2,7 @@ from array import *
 from aima_search import Problem
 import copy
 from aima_search import uniform_cost_search, depth_first_graph_search, breadth_first_graph_search, iterative_deepening_search, greedy_best_first_graph_search, astar_search
-
+import time
 
 class BloxorzBoard(object):
     def __init__(self, board_file):
@@ -55,8 +55,15 @@ class BloxorzGame(object):
         currState = copy.deepcopy(self.state)
         self.problem.setState(currState)
 
-        if algorithm == "A*":
-            return self.algorithms[algorithm](self.problem, h)
+        self.problem.startTime = time.time()
+        print("devia dar")
+
+        if algorithm == "A*" or algorithm == 'GS':
+            answer = self.algorithms[algorithm](self.problem, h)
+            if answer == None:
+                return ({},73)
+            
+            return answer
 
         return self.algorithms[algorithm](self.problem)
 

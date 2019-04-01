@@ -5,6 +5,7 @@ import sys
 import random
 import math
 from collections import defaultdict, deque
+import time
 """Search (Chapters 3-4)
 
 From https://github.com/aimacode/aima-python/
@@ -308,6 +309,11 @@ def best_first_graph_search(problem, f):
     frontier.append(node)
     explored = set()
     while frontier:
+        current = time.time()
+        if current - problem.startTime > 200:
+            return None
+
+
         node = frontier.pop()
         if problem.goal_test(node.state):
             nodes = numNodes
@@ -332,6 +338,11 @@ def uniform_cost_search(problem):
 def depth_limited_search(problem, limit=50):
     """[Figure 3.17]"""
     def recursive_dls(node, problem, limit):
+
+        current = time.time()
+        if current - problem.startTime > 200:
+            return None
+
         if problem.goal_test(node.state):
             return node
         elif limit == 0:
@@ -347,8 +358,8 @@ def depth_limited_search(problem, limit=50):
             return 'cutoff' if cutoff_occurred else None
 
     # Body of depth_limited_search:
-    return recursive_dls(Node(problem.initial), problem, limit)
 
+    return recursive_dls(Node(problem.initial), problem, limit)
 
 def iterative_deepening_search(problem):
     """[Figure 3.18]"""
@@ -356,6 +367,10 @@ def iterative_deepening_search(problem):
 
     for depth in range(sys.maxsize):
         result = depth_limited_search(problem, depth)
+
+        if result == None:
+            return ({},73)
+
         if result != 'cutoff':
             nodes = numNodes
             numNodes = 0

@@ -26,10 +26,10 @@ sheet = client.open("bloxor").get_worksheet(2)
 algorithms = ["DFS", "BFS", "UCS", "IDDFS", "GS", "A*", "A*"]
 
 
-for alg in range(1, len(algorithms) + 1):  # algoritmo
+for alg in range(6, len(algorithms) + 1):  # algoritmo
 
-    if alg == 4:
-        continue
+    #if alg == 4:
+    #    continue
 
     sheet = client.open("bloxor").get_worksheet(alg-1)
     print("ja abriu ", alg-1)
@@ -51,21 +51,32 @@ for alg in range(1, len(algorithms) + 1):  # algoritmo
                 (goalNode, numNodes) = game.solve(algorithms[alg-1], h2)
             else:
                 (goalNode, numNodes) = game.solve(algorithms[alg-1])
-            end = time.time()
-            duration = end - start
-            avg = avg + duration
+            
+            if goalNode == {} and numNodes == 73:
+                numNodes = 0
+                duration = 'TIMEOUT'
+            else:
+                end = time.time()
+                duration = end - start
+                avg = avg + duration
+            
+                if duration > max:
+                    max = duration
 
-            if duration > max:
-                max = duration
+                if duration < min:
+                    min = duration
 
-            if duration < min:
-                min = duration
-
-            solLen = len(goalNode.solution())
-
-            #print(duration, solLen, numNodes)
+                solLen = len(goalNode.solution())
 
             x = 2 + j + 7*(i-1)
+
+            if duration == 'TIMEOUT':
+                sheet.update_cell(x, 5, duration)
+                break
+                
+            #print(duration, solLen, numNodes)
+
+            
 
             if j == 1:
                 time.sleep(1)
@@ -79,3 +90,6 @@ for alg in range(1, len(algorithms) + 1):  # algoritmo
             if j == 7:
                 time.sleep(1)
                 sheet.update_cell(x-6, 6, (avg-max-min)/5)
+
+            
+
