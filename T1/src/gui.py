@@ -162,10 +162,10 @@ class BloxorzUI(tk.Frame):
         }
 
         self.keyToAction = {
-            "i": "Up",
-            "k": "Down",
-            "j": "Left",
-            "l": "Right",
+            "w": "Up",
+            "s": "Down",
+            "a": "Left",
+            "d": "Right",
         }
 
         self.__initUI(controller)
