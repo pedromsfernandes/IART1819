@@ -6,6 +6,7 @@ Executar
 
 Pré-requisitos:
 tkinter: apt-get install python3-tk
+numpy: pip install numpy (windows) pip3 install numpy (linux)
 
 Em linux, abril um terminal dentro da pasta src/ e correr: python3 bloxorz.py
 Em windows, correr: python blorxorz.py

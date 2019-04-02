@@ -185,8 +185,7 @@ class BloxorzUI(tk.Frame):
         algorithm.set(self.algorithms[self.i])
 
     def tip(self):
-        tip = self.game.tip(self.algorithms[self.i])
-        tk.Label(self, text=tip).pack()
+        self.tip.set(self.game.tip(self.algorithms[self.i]))
 
     def solve(self):
         start = time.time()
@@ -202,15 +201,9 @@ class BloxorzUI(tk.Frame):
             print(actions)
             self.solveAnim(actions)
 
-        tk.Label(self, text="Statistics").pack()
-        tk.Label(self, text="Expanded nodes").pack()
-        self.nodes = tk.StringVar()
         self.nodes.set(numNodes)
-        self.time = tk.StringVar()
         self.time.set(str(duration) + " s")
-        tk.Label(self, textvariable=self.nodes).pack()
-        tk.Label(self, text="Time:").pack()
-        tk.Label(self, textvariable=self.time).pack()
+
 
     def __initUI(self, controller):
         numLines = len(self.game.start_board)
@@ -241,6 +234,18 @@ class BloxorzUI(tk.Frame):
 
         tk.Button(self, text="Exit",
                   command=lambda: controller.show_frame(MainMenu)).pack()
+
+        self.tip = tk.StringVar()
+        self.tip.set("Tip")
+        tk.Label(self, textvariable=self.tip).pack()
+
+        tk.Label(self, text="Statistics").pack()
+        tk.Label(self, text="Expanded nodes").pack()
+        self.nodes = tk.StringVar()
+        self.time = tk.StringVar()
+        tk.Label(self, textvariable=self.nodes).pack()
+        tk.Label(self, text="Time").pack()
+        tk.Label(self, textvariable=self.time).pack()
 
         self.canvas.bind("<Key>", self.key)
         self.canvas.bind("<Button-1>", self.mouse)
