@@ -56,10 +56,9 @@ class BloxorzGame(object):
         self.problem.setState(currState)
 
         self.problem.startTime = time.time()
-        print("devia dar")
 
-        if algorithm == "A*" or algorithm == 'GS':
-            answer = self.algorithms[algorithm](self.problem, h)
+        if algorithm == "A*" or algorithm == "GS":
+            answer = self.algorithms[algorithm](self.problem, h2)
             if answer == None:
                 return ({},73)
             
@@ -513,4 +512,4 @@ def h2(node):
     x1, y1, t, z, s = node.state.blockCoords
     x2, y2 = node.state.solutionCoords
 
-    return (abs(x2 - x1) + abs(y2 - y1))*2/3
+    return (abs(x2 - x1) + abs(y2 - y1))/1.5

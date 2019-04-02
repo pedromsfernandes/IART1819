@@ -26,7 +26,7 @@ sheet = client.open("bloxor").get_worksheet(2)
 algorithms = ["DFS", "BFS", "UCS", "IDDFS", "GS", "A*", "A*"]
 
 
-for alg in range(6, len(algorithms) + 1):  # algoritmo
+for alg in range(7, len(algorithms) + 1):  # algoritmo
 
     #if alg == 4:
     #    continue
@@ -36,7 +36,7 @@ for alg in range(6, len(algorithms) + 1):  # algoritmo
     for i in range(1, getNumLevels() + 1):  # niveis
 
         avg = 0
-        max = 0
+        mag = 0
         min = 99999
 
         for j in range(1, 8):  # ensaios
@@ -60,8 +60,8 @@ for alg in range(6, len(algorithms) + 1):  # algoritmo
                 duration = end - start
                 avg = avg + duration
             
-                if duration > max:
-                    max = duration
+                if duration > mag:
+                    mag = duration
 
                 if duration < min:
                     min = duration
@@ -80,16 +80,17 @@ for alg in range(6, len(algorithms) + 1):  # algoritmo
 
             if j == 1:
                 time.sleep(1)
-                sheet.update_cell(x, 2, solLen)
+                #sheet.update_cell(x, 2, solLen)
+                sheet.update_cell(x, 7, solLen)
                 time.sleep(1)
-                sheet.update_cell(x, 3, numNodes)
+                #sheet.update_cell(x, 3, numNodes)
+                sheet.update_cell(x, 8, numNodes)
 
             time.sleep(1)
-            sheet.update_cell(x, 5, duration)
+            #sheet.update_cell(x, 5, duration)
+            sheet.update_cell(x, 9, duration)
 
             if j == 7:
                 time.sleep(1)
-                sheet.update_cell(x-6, 6, (avg-max-min)/5)
-
-            
-
+                #sheet.update_cell(x-6, 6, (avg-mag-min)/5)
+                sheet.update_cell(x-6, 10, (avg-mag-min)/5)
