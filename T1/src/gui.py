@@ -185,8 +185,7 @@ class BloxorzUI(tk.Frame):
         algorithm.set(self.algorithms[self.i])
 
     def tip(self):
-        tip = self.game.tip(self.algorithms[self.i])
-        tk.Label(self, text=tip).pack()
+        self.tip.set(self.game.tip(self.algorithms[self.i]))
 
     def solve(self):
         start = time.time()
@@ -241,6 +240,10 @@ class BloxorzUI(tk.Frame):
 
         tk.Button(self, text="Exit",
                   command=lambda: controller.show_frame(MainMenu)).pack()
+
+        self.tip = tk.StringVar()
+        self.tip.set("Tip")
+        tk.Label(self, textvariable=self.tip).pack()
 
         self.canvas.bind("<Key>", self.key)
         self.canvas.bind("<Button-1>", self.mouse)
