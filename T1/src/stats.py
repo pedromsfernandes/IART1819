@@ -1,7 +1,5 @@
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-
-
 from utils import getNumLevels
 from game import BloxorzGame, h1, h2
 import time
@@ -12,46 +10,36 @@ scope = ['https://www.googleapis.com/auth/drive']
 creds = ServiceAccountCredentials.from_json_keyfile_name('cred.json', scope)
 client = gspread.authorize(creds)
 
-# Find a workbook by name and open the first sheet
-# Make sure you use the right name here.
-sheet = client.open("bloxor").get_worksheet(2)
-
-# Extract and print all of the values
-# list_of_hashes = sheet.get_all_records()
-# print(list_of_hashes)
-
-#sheet.update_cell(4, 5, "I just wrote to a spreadsheet using Python!")
-
-
+# List of the algorithms
 algorithms = ["DFS", "BFS", "UCS", "IDDFS", "GS", "A*", "A*"]
 
 
-for alg in range(7, len(algorithms) + 1):  # algoritmo
+for alg in range(5, len(algorithms) + 1):  # algorithm
 
-    #if alg == 4:
-    #    continue
 
     sheet = client.open("bloxor").get_worksheet(alg-1)
-    print("ja abriu ", alg-1)
-    for i in range(1, getNumLevels() + 1):  # niveis
+    for i in range(1, getNumLevels() + 1):  # level
 
         avg = 0
         mag = 0
         min = 99999
 
-        for j in range(1, 8):  # ensaios
+        for j in range(1, 8):  # number of tries
 
             game = BloxorzGame("../res/levels/level" + str(i) + ".txt")
             start = time.time()
 
-            if alg - 1 == 5:
+            if alg - 1 == 5: # first heuristic a star
                 (goalNode, numNodes) = game.solve(algorithms[alg-1], h1)
 
-            elif alg - 1 == 6:
+            elif alg - 1 == 6: # second heuristic a star
+                (goalNode, numNodes) = game.solve(algorithms[alg-1], h2)
+            elif alg - 1 == 4: # second heuristic greedy
                 (goalNode, numNodes) = game.solve(algorithms[alg-1], h2)
             else:
                 (goalNode, numNodes) = game.solve(algorithms[alg-1])
             
+            # To catch timeouts
             if goalNode == {} and numNodes == 73:
                 numNodes = 0
                 duration = 'TIMEOUT'
@@ -70,27 +58,20 @@ for alg in range(7, len(algorithms) + 1):  # algoritmo
 
             x = 2 + j + 7*(i-1)
 
+            # Update the google sheet
             if duration == 'TIMEOUT':
                 sheet.update_cell(x, 5, duration)
                 break
                 
-            #print(duration, solLen, numNodes)
-
-            
-
             if j == 1:
                 time.sleep(1)
-                #sheet.update_cell(x, 2, solLen)
-                sheet.update_cell(x, 7, solLen)
+                sheet.update_cell(x, 2, solLen)
                 time.sleep(1)
-                #sheet.update_cell(x, 3, numNodes)
-                sheet.update_cell(x, 8, numNodes)
+                sheet.update_cell(x, 3, numNodes)
 
             time.sleep(1)
-            #sheet.update_cell(x, 5, duration)
-            sheet.update_cell(x, 9, duration)
+            sheet.update_cell(x, 5, duration)
 
             if j == 7:
                 time.sleep(1)
-                #sheet.update_cell(x-6, 6, (avg-mag-min)/5)
-                sheet.update_cell(x-6, 10, (avg-mag-min)/5)
+                sheet.update_cell(x-6, 6, (avg-mag-min)/5)

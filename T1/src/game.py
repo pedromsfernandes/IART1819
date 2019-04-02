@@ -71,7 +71,7 @@ class BloxorzGame(object):
         self.problem.startTime = time.time()
 
         if algorithm == "A*" or algorithm == "GS":
-            answer = self.algorithms[algorithm](self.problem, h2)
+            answer = self.algorithms[algorithm](self.problem, h)
             if answer == None:
                 return ({},73) #defined as the infinite loop exception
             

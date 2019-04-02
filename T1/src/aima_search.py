@@ -309,6 +309,7 @@ def best_first_graph_search(problem, f):
     frontier.append(node)
     explored = set()
     while frontier:
+
         current = time.time()
         if current - problem.startTime > 200:
             return None
@@ -319,14 +320,19 @@ def best_first_graph_search(problem, f):
             nodes = numNodes
             numNodes = 0
             return (node, nodes)
-        explored.add(node.state)
+
         for child in node.expand(problem):
             if child.state not in explored and child not in frontier:
-                frontier.append(child)
+                if not areSameCoords(node.state,explored):
+                    frontier.append(child)
             elif child in frontier:
                 if f(child) < frontier[child]:
                     del frontier[child]
                     frontier.append(child)
+
+        if not areSameCoords(node.state,explored):
+            explored.add(node.state)
+        
     return None
 
 
