@@ -53,11 +53,17 @@ class BloxorzGame(object):
     """
     Calls the given algorithm and returns the best next move needed to complete the level.
     """
-    def tip(self, algorithm):
+    def tip(self, algorithm, h=None):
         self.problem.setState(self.state)
+        self.problem.startTime = time.time()
 
-        (goalNode, node) = self.algorithms[algorithm](self.problem)
+        if algorithm == "A*" or algorithm == "GS":
+            (goalNode, node) = self.algorithms[algorithm](self.problem, h2)
+        else:
+            (goalNode, node) = self.algorithms[algorithm](self.problem)
+
         return goalNode.solution()[0]
+
 
     """
     Calls the given algorithm and returns the actions needed to solve the current level.
