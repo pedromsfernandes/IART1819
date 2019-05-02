@@ -1,13 +1,9 @@
-import com.sun.xml.internal.fastinfoset.util.StringArray;
-
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,6 +22,9 @@ public class Reader {
     private Integer numRooms;
     private ArrayList<Room> rooms = new ArrayList<>();
 
+    private ArrayList<PeriodHardConstraint> periodHardConstraints = new ArrayList<>();
+    private ArrayList<RoomHardConstraint> roomHardConstraints = new ArrayList<>();
+
     // ---------------------------------------------------------
 
 
@@ -43,8 +42,7 @@ public class Reader {
         readExams(br);
         readPeriods(br);
         readRooms(br);
-
-        //readPeriodConstraints(br);
+        readHardConstraints(br);
 
 
         //Close the input stream
@@ -129,5 +127,40 @@ public class Reader {
         }
     }
 
+    private void readHardConstraints(BufferedReader br) throws IOException {
+        String strLine;
+
+        strLine = br.readLine();    // Reading PeriodHardConstraints header
+        strLine = br.readLine();    // Reading the first PeriodHardConstraint
+
+        while (strLine.charAt(0) != '[') {
+
+            String[] values_raw = strLine.split(", ");
+            int exam1 = Integer.parseInt(values_raw[0]);
+            String constraint = values_raw[1];
+            int exam2 = Integer.parseInt(values_raw[2]);
+
+            PeriodHardConstraint periodHardConstraint = new PeriodHardConstraint(exam1, exam2, constraint);
+            periodHardConstraints.add(periodHardConstraint);
+
+            strLine = br.readLine();
+        }
+
+        strLine = br.readLine();    // Reading the first RoomHardConstraint
+
+        while (strLine.charAt(0) != '[') {
+
+            String[] values_raw = strLine.split(", ");
+            int room1 = Integer.parseInt(values_raw[0]);
+
+            RoomHardConstraint roomHardConstraint = new RoomHardConstraint(room1);
+            roomHardConstraints.add(roomHardConstraint);
+
+            strLine = br.readLine();
+        }
+
+        // TODO : read institutional wheightenings if they are going to be used
+
+    }
 
 }
