@@ -5,7 +5,13 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
 
-        Reader.getInstance().readFile(args[0]);
+        Problem problem = new Problem(args[0]);
+
+        ArrayList<Room> rooms = problem.getRooms();
+
+        for(Room room : rooms){
+            System.out.println(room.getCapacity());
+        }
 
         return;
     }

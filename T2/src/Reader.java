@@ -9,56 +9,30 @@ import java.util.regex.Pattern;
 
 public class Reader {
 
-    private static Reader instance = new Reader();
+    public static Reader instance = new Reader();
 
     // Project Variables ---------------------------------------
-
-    private Integer numExams;
-    private ArrayList<Exam> exams = new ArrayList<>();
-
-    private Integer numPeriods;
-    private ArrayList<Period> periods = new ArrayList<>();
-
-    private Integer numRooms;
-    private ArrayList<Room> rooms = new ArrayList<>();
-
-    private ArrayList<PeriodHardConstraint> periodHardConstraints = new ArrayList<>();
-    private ArrayList<RoomHardConstraint> roomHardConstraints = new ArrayList<>();
 
     // ---------------------------------------------------------
 
 
-    private void Reader(){}
+    public void Reader(){}
 
     public static Reader getInstance() {
         return instance;
     }
 
-    public void readFile(String filename) throws IOException {
-        // Open the file
-        FileInputStream fstream = new FileInputStream(filename);
-        BufferedReader br = new BufferedReader(new InputStreamReader(fstream));
+    public ArrayList<Exam> readExams(BufferedReader br) throws IOException {
 
-        readExams(br);
-        readPeriods(br);
-        readRooms(br);
-        readHardConstraints(br);
+        ArrayList<Exam> exams = new ArrayList<Exam>();
 
-
-        //Close the input stream
-        fstream.close();
-
-        return;
-    }
-
-    private void readExams(BufferedReader br) throws IOException {
         String strLine;
         strLine = br.readLine();
 
         Pattern r = Pattern.compile("(\\d+)");
         Matcher m = r.matcher(strLine);
         m.find();
-        numExams = Integer.parseInt(m.group(0));
+        int numExams = Integer.parseInt(m.group(0));
 
         for(int i = 0; i < numExams; i++) {
             strLine = br.readLine();
@@ -78,9 +52,12 @@ public class Reader {
             Exam exam = new Exam(id, examDuration, students);
             exams.add(exam);
         }
+
+        return exams;
     }
 
-    private void readPeriods(BufferedReader br) throws IOException {
+    public ArrayList<Period> readPeriods(BufferedReader br) throws IOException {
+        ArrayList<Period> periods = new ArrayList<Period>();
         String strLine;
         strLine = br.readLine();
 
@@ -88,7 +65,7 @@ public class Reader {
         Matcher m = r.matcher(strLine);
         m.find();
 
-        numPeriods = Integer.parseInt(m.group(0));
+        int numPeriods = Integer.parseInt(m.group(0));
 
         for(int i = 0; i < numPeriods; i++) {
             strLine = br.readLine();
@@ -102,9 +79,13 @@ public class Reader {
             Period period = new Period(date, time, duration, penalty);
             periods.add(period);
         }
+
+        return periods;
     }
 
-    private void readRooms(BufferedReader br) throws IOException {
+    public ArrayList<Room> readRooms(BufferedReader br) throws IOException {
+        ArrayList<Room> rooms = new ArrayList<Room>();
+
         String strLine;
         strLine = br.readLine();
 
@@ -112,7 +93,7 @@ public class Reader {
         Matcher m = r.matcher(strLine);
         m.find();
 
-        numRooms = Integer.parseInt(m.group(0));
+        int numRooms = Integer.parseInt(m.group(0));
 
         for (int i = 0; i < numRooms; i++) {
             strLine = br.readLine();
@@ -125,9 +106,12 @@ public class Reader {
 
             rooms.add(room);
         }
+
+        return rooms;
     }
 
-    private void readHardConstraints(BufferedReader br) throws IOException {
+    public ArrayList<PeriodHardConstraint> readPeriodHardConstraints(BufferedReader br) throws IOException {
+        ArrayList<PeriodHardConstraint> periodHardConstraints = new ArrayList<PeriodHardConstraint>();
         String strLine;
 
         strLine = br.readLine();    // Reading PeriodHardConstraints header
@@ -146,6 +130,15 @@ public class Reader {
             strLine = br.readLine();
         }
 
+        return periodHardConstraints;
+    }
+
+    public ArrayList<RoomHardConstraint>  readRoomHardConstraints(BufferedReader br) throws IOException {
+        
+        ArrayList<RoomHardConstraint> roomHardConstraints = new ArrayList<RoomHardConstraint>();
+
+        String strLine;
+
         strLine = br.readLine();    // Reading the first RoomHardConstraint
 
         while (strLine.charAt(0) != '[') {
@@ -158,6 +151,8 @@ public class Reader {
 
             strLine = br.readLine();
         }
+
+        return roomHardConstraints;
 
         // TODO : read institutional wheightenings if they are going to be used
 
