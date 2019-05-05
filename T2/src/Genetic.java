@@ -124,7 +124,9 @@ public class Genetic {
             int index = rand.nextInt(exams.size());
 
             if(mutationTarget) {
-                
+                //TODO: MUTATE ROOM
+            } else {
+                // TODO: MUTATE PERIOD
             }
 
             /*
