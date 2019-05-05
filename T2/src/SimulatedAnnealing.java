@@ -49,14 +49,14 @@ class SimulatedAnnealing {
         for (double temp = 1000; temp > 1; temp *= 1 - coolingRate ) {
             ArrayList<String> newSolution = currentSolution;
 
-            // int discipline1 = (int) (newSolution.size() * Math.random());
-            // int discipline2 = (int) (newSolution.size() * Math.random());
+            int exam1 = (int) (newSolution.size() * Math.random());
+            int exam2 = (int) (newSolution.size() * Math.random());
 
-            // int slot1 = newSolution.get(discipline1);
-            // int slot2 = newSolution.get(discipline2);
+            String value1 = newSolution.get(discipline1);
+            String value2 = newSolution.get(discipline2);
         
-            // newSolution.set(discipline1, slot2);
-            // newSolution.set(discipline2, slot1);
+            newSolution.set(discipline1, slot2);
+            newSolution.set(discipline2, slot1);
 
             int currentEnergy = problem.evaluate(currentSolution);
             int neighbourEnergy = problem.evaluate(newSolution);

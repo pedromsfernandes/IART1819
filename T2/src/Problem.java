@@ -78,11 +78,44 @@ class Problem {
 
         int value = 0;
 
-        for(String exam : solution){
-            int period = Integer.parseInt(exam.substring(0, exam.indexOf(',')));
-            int room = Integer.parseInt(exam.substring(exam.indexOf(',')));
-        }
+        int numConflicts = getNumConflicts(solution);
+
+        int numRoomOccupancy = getNumRoomOccupancy(solution);
 
         return value;
     }
+
+    public int getNumConflicts(ArrayList<String> solution){
+        int numConflicts = 0;
+        for(int i = 0; i < periods.size(); i++){
+            for(String exam : solution){
+                int period = Integer.parseInt(exam.substring(0, exam.indexOf(',')));
+                if(period == i)
+                    numConflicts++;
+            }
+        }
+        return numConflicts;
+
+    }
+
+    public int getNumRoomOccupancy(ArrayList<String> solution){
+        int numRoomOccupancy = 0;
+
+        for(int i = 0; i < rooms.size(); i++){
+            int roomOccupancy = 0;
+            for(int j = 0; j < solution.size(); j++){
+                String exam = solution.get(j);
+                int room = Integer.parseInt(exam.substring(exam.indexOf(',')));
+                if(room == i)
+                    roomOccupancy=exams.get(j).getStudents().size();
+            }
+
+            if(roomOccupancy > rooms.get(i).getCapacity())
+                numRoomOccupancy++;
+        }
+
+        return numRoomOccupancy;
+    }
+
+    public int getNumPeriodUtilisation
 }
