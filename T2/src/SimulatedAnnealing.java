@@ -12,51 +12,23 @@ class SimulatedAnnealing {
         return Math.exp((energy - newEnergy) / temperature);
     }
 
-    public static ArrayList<String> getRandomSolution(int numExams, int numTimeslots, int numRooms) {
-        ArrayList<String> solution = new ArrayList<String>();
-
-        for (int i = 0; i < numExams; i++) {
-            int timeslot = randInt(0, numTimeslots);
-            int room = randInt(0, numRooms);
-
-            solution.add(timeslot + ", " + room);
-        }
-
-        return solution;
-    }
-
-    public static int randInt(int min, int max) {
-
-        Random rand = new Random();
-
-        // nextInt is normally exclusive of the top value,
-        // so add 1 to make it inclusive
-        int randomNum = rand.nextInt((max - min) + 1) + min;
-
-        return randomNum;
-    }
-
     public static void solve(Problem problem){
         double coolingRate = 0.003;
 
-        ArrayList<Exam> exams = problem.getExams();
-        ArrayList<Period> periods = problem.getPeriods(); 
-        ArrayList<Room> rooms = problem.getRooms();
-
-        ArrayList<String> currentSolution = getRandomSolution(exams.size(), periods.size(), rooms.size());
+        ArrayList<String> currentSolution = problem.getRandomSolution();
         ArrayList<String> best = currentSolution;
 
         for (double temp = 1000; temp > 1; temp *= 1 - coolingRate ) {
             ArrayList<String> newSolution = currentSolution;
 
-            int exam1 = (int) (newSolution.size() * Math.random());
-            int exam2 = (int) (newSolution.size() * Math.random());
+            // int exam1 = (int) (newSolution.size() * Math.random());
+            // int exam2 = (int) (newSolution.size() * Math.random());
 
-            String value1 = newSolution.get(discipline1);
-            String value2 = newSolution.get(discipline2);
+            // String value1 = newSolution.get(discipline1);
+            // String value2 = newSolution.get(discipline2);
         
-            newSolution.set(discipline1, slot2);
-            newSolution.set(discipline2, slot1);
+            // newSolution.set(discipline1, slot2);
+            // newSolution.set(discipline2, slot1);
 
             int currentEnergy = problem.evaluate(currentSolution);
             int neighbourEnergy = problem.evaluate(newSolution);

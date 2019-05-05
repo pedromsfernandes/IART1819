@@ -21,10 +21,14 @@ public class Main {
 
         try {
             Problem problem = new Problem(args[0]);
+
+            ArrayList<String> solution = problem.getRandomSolution();
+            System.out.println(problem.evaluate(solution));
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+
 
         return;
     }
