@@ -22,15 +22,13 @@ public class Main {
         try {
             Problem problem = new Problem(args[0]);
 
-            ArrayList<String> solution = problem.getRandomSolution();
-            System.out.println(problem.evaluate(solution));
+            ArrayList<String> solution = SimulatedAnnealing.solve(problem);
+            System.out.println("Value:_" + problem.evaluate(solution, true)); 
+            writeSolution(solution, args[0].replaceFirst("[.][^.]+$", ""));
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
-
-        return;
     }
 
     public static void writeSolution(ArrayList<String> solution, String filename) throws IOException {
@@ -46,7 +44,6 @@ public class Main {
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fstream));
 
         for (String exam : solution) {
-            System.out.println(exam);
             bw.write(exam + "\r\n");
         }
 
