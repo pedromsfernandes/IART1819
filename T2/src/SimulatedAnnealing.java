@@ -23,31 +23,25 @@ class SimulatedAnnealing {
             ArrayList<String> newSolution = currentSolution;
 
             int randInt = Problem.randInt(0, 2);
-            int direction1 = Math.random() > 0.5 ? 1 : -1;
-            int direction2 = Math.random() > 0.5 ? 1 : -1;
+            int index1 = (int) (Math.random() * newSolution.size());
+            int index2 = (int) (Math.random() * newSolution.size());
 
-            int periods = problem.getPeriods().size();
-            int rooms = problem.getRooms().size();
+            String exam1 = newSolution.get(index1);
+            String exam2 = newSolution.get(index2);
 
-            for (int i = 0; i < newSolution.size(); i++) {
-                String exam = newSolution.get(i);
-   
-                int period = Integer.parseInt(exam.substring(0, exam.indexOf(',')));
-                int room = Integer.parseInt(exam.substring(exam.indexOf(',') + 2));
-                period += randInt * direction1;
-                room += randInt * direction2;
+            int period1 = problem.getPeriod(exam1);
+            int period2 = problem.getPeriod(exam2);
 
-                if (period >= periods)
-                    period = 0;
-                else if (period < 0)
-                    period = periods - 1;
+            int room1 = problem.getRoom(exam1);
+            int room2 = problem.getRoom(exam2);
 
-                if (room >= rooms)
-                    room = 0;
-                else if (room < 0)
-                    room = rooms - 1;
-
-                newSolution.set(i, period + ", " + room);
+            if(randInt == 0){
+                newSolution.set(index1, period2 + ", " + room1);
+                newSolution.set(index2, period1 + ", " + room2);
+            }
+            else{
+                newSolution.set(index1, period1 + ", " + room2);
+                newSolution.set(index2, period2 + ", " + room1);
             }
 
             int currentEnergy = problem.evaluate(currentSolution, false);
