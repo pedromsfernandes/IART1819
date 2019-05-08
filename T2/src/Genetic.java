@@ -16,13 +16,13 @@ public class Genetic {
 
     public static Problem problemInstance;
 
-    public static void geneticSolve(Problem problem) {
+    public static ArrayList<String> geneticSolve(Problem problem) {
         exams = problem.getExams();
         periods = problem.getPeriods();
         rooms = problem.getRooms();
         problemInstance = problem;
 
-        ArrayList<ArrayList<String>> population = generatePopulation(exams.size(), periods.size(), rooms.size());
+        ArrayList<ArrayList<String>> population = generatePopulation(problem);
         ArrayList<String> bestSolution = getBestSolution(population);
 
         System.out.print("BEST FROM INITIAL POPULATION:  ");
@@ -44,33 +44,19 @@ public class Genetic {
 
         System.out.println("Number of generations: " + generationCounter);
 
-        return;
+        return bestSolution;
     }
 
     // COMPLETE
-    private static ArrayList<ArrayList<String>> generatePopulation(int numExams, int numTimeslots, int numRooms) {
+    private static ArrayList<ArrayList<String>> generatePopulation(Problem problem) {
         ArrayList<ArrayList<String>> population = new ArrayList<ArrayList<String>>();
 
         for (int i = 0; i < POPULATION_SIZE; i++){
-            ArrayList<String> solution = getRandomSolution(numExams, numTimeslots, numRooms);
+            ArrayList<String> solution = problem.getRandomSolution();
             population.add(solution);
         }
 
         return population;
-    }
-
-    // COMPLETE
-    public static ArrayList<String> getRandomSolution(int numExams, int numTimeslots, int numRooms) {
-        ArrayList<String> solution = new ArrayList<String>();
-
-        for (int i = 0; i < numExams; i++) {
-            int timeslot = randInt(0, numTimeslots);
-            int room = randInt(0, numRooms);
-
-            solution.add(timeslot + ", " + room);
-        }
-
-        return solution;
     }
 
     // COMPLETE
@@ -174,17 +160,5 @@ public class Genetic {
         for(String i: solution) {
             System.out.print(i + ", ");
         }
-    }
-
-    // AUXILIAR
-    public static int randInt(int min, int max) {
-
-        Random rand = new Random();
-
-        // nextInt is normally exclusive of the top value,
-        // so add 1 to make it inclusive
-        int randomNum = rand.nextInt((max - min) + 1) + min;
-
-        return randomNum;
     }
 }

@@ -20,11 +20,26 @@ public class Main {
         }
 
         try {
-            Problem problem = new Problem(args[0]);
+            String fileName = args[0];
+            Problem problem = new Problem(fileName);
+            ArrayList<String> solution = new ArrayList<String>();
 
-            ArrayList<String> solution = SimulatedAnnealing.solve(problem);
-            System.out.println("Value:_" + problem.evaluate(solution, true)); 
-            writeSolution(solution, args[0].replaceFirst("[.][^.]+$", ""));
+            switch (args[1]) {
+            case "GENETIC":
+                solution = Genetic.geneticSolve(problem);
+                break;
+            case "ANNEALING":
+                solution = SimulatedAnnealing.solve(problem);
+                break;
+            case "HILLCLIMB":
+                // solution = HillClimb.solve(problem);
+                break;
+            default:
+                break;
+            }
+
+            System.out.println("Final value: " + problem.evaluate(solution, true));
+            writeSolution(solution, fileName.replaceFirst("[.][^.]+$", ""));
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
