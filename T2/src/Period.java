@@ -3,12 +3,28 @@ class Period {
     private String time;
     private int duration;
     private int penalty;
+    private int id;
 
-    public Period(String date, String time, int duration, int penalty) {
+    public Period(int id, String date, String time, int duration, int penalty) {
+        this.setId(id);
         this.setDate(date);
         this.setTime(time);
         this.setDuration(duration);
         this.setPenalty(penalty);
+    }
+
+    /**
+     * @return the id
+     */
+    public int getId() {
+        return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    public void setId(int id) {
+        this.id = id;
     }
 
     /**
@@ -65,5 +81,20 @@ class Period {
      */
     public void setDuration(int duration) {
         this.duration = duration;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+
+        if (!(o instanceof Period)) {
+            return false;
+        }
+
+        Period p = (Period) o;
+
+        // Compare the data members and return accordingly
+        return this.id == p.id;
     }
 }

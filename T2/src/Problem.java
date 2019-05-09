@@ -1,8 +1,11 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,7 +25,7 @@ class Problem {
     private ArrayList<PeriodHardConstraint> periodHardConstraints;
     private ArrayList<RoomHardConstraint> roomHardConstraints;
 
-    private HashMap<String, Integer> chart;
+    private HashMap<Integer, ArrayList<Integer>> chart;
 
     public Problem(String filename) throws IOException {
 
@@ -81,7 +84,7 @@ class Problem {
         this.exams = exams;
     }
 
-    public int evaluate(ArrayList<String> solution, boolean print) {
+    public int evaluate(ArrayList<Exam> solution, boolean print) {
 
         // Hard constraints
         int numConflicts = getNumConflicts(solution);
@@ -101,7 +104,7 @@ class Problem {
         return numConflicts + numRoomOccupancy + numRoomRelated + numPeriodRelated + numPeriodUtilisation;
     }
 
-    public int evaluate(ArrayList<String> solution) {
+    public int evaluate(ArrayList<Exam> solution) {
 
         // Hard constraints
         int numConflicts = getNumConflicts(solution);
@@ -115,31 +118,42 @@ class Problem {
 
     // TODO: numero de conflictos é numero de exames no mesmo periodo, onde pelo
     // menos um estudante está inscrito aos dois
-    public int getNumConflicts(ArrayList<String> solution) {
+    public int getNumConflicts(ArrayList<Exam> solution) {
         int numConflicts = 0;
 
-        for (Map.Entry<String, Integer> entry : chart.entrySet()) {
-            String pair = entry.getKey();
-            int exam1 = Integer.parseInt(pair.substring(0, pair.indexOf("-")));
-            int exam2 = Integer.parseInt(pair.substring(pair.indexOf("-") + 1));
+        for (Map.Entry<Integer, ArrayList<Integer>> entry : chart.entrySet()) {
 
-            if (getPeriod(solution.get(exam1)) == getPeriod(solution.get(exam2)))
-                numConflicts++;
+            int exam1 = entry.getKey();
 
+            for (int exam2 : entry.getValue()) {
+                if (solution.get(exam1).getPeriod().equals(solution.get(exam2).getPeriod()))
+                    numConflicts++;
+            }
         }
 
         return numConflicts;
     }
 
-    public HashMap<String, Integer> getIncompatibityChart() {
-        HashMap<String, Integer> chart = new HashMap<String, Integer>();
+    public HashMap<Integer, ArrayList<Integer>> getIncompatibityChart() {
+        HashMap<Integer, ArrayList<Integer>> chart = new HashMap<Integer, ArrayList<Integer>>();
 
         for (int i = 0; i < exams.size(); i++) {
             for (int j = i + 1; j < exams.size(); j++) {
                 int common = commonElements(exams.get(i).getStudents(), exams.get(j).getStudents());
 
-                if (common > 0)
-                    chart.put(i + "-" + j, common);
+                if (common > 0) {
+                    ArrayList<Integer> current = chart.get(i);
+
+                    if (current != null) {
+                        current.add(j);
+                        chart.replace(i, current);
+                    } else {
+                        current = new ArrayList<Integer>();
+                        current.add(j);
+                        chart.put(i, current);
+                    }
+
+                }
             }
         }
 
@@ -164,25 +178,27 @@ class Problem {
         return commonElements.size();
     }
 
-    public int getNumRoomOccupancy(ArrayList<String> solution) {
+    public int getNumRoomOccupancy(ArrayList<Exam> solution) {
         int numRoomOccupancy = 0;
         HashMap<String, Integer> visitedPeriods = new HashMap<String, Integer>();
         int size = solution.size();
 
         for (int i = 0; i < size; i++) {
-            String exam = solution.get(i);
-            if (visitedPeriods.containsKey(exam)) {
+            Exam exam = solution.get(i);
+            String key = exam.getPeriod().getId() + ", " + exam.getRoom().getId();
+            if (visitedPeriods.containsKey(key)) {
                 continue;
             }
 
             int numStudentsExam1 = exams.get(i).getStudents().size();
-            visitedPeriods.put(exam, numStudentsExam1);
+            visitedPeriods.put(key, numStudentsExam1);
 
             for (int j = i + 1; j < size; j++) {
-                String exam2 = solution.get(j);
+                Exam exam2 = solution.get(j);
+                String key2 = exam2.getPeriod().getId() + ", " + exam2.getRoom().getId();
 
-                if (exam.equals(exam2)) {
-                    visitedPeriods.replace(exam, numStudentsExam1 + exams.get(j).getStudents().size());
+                if (key.equals(key2)) {
+                    visitedPeriods.replace(key, numStudentsExam1 + exams.get(j).getStudents().size());
                 }
             }
         }
@@ -205,30 +221,30 @@ class Problem {
         return Integer.parseInt(exam.substring(0, exam.indexOf(", ")));
     }
 
-    public int getNumPeriodUtilisation(ArrayList<String> solution) {
+    public int getNumPeriodUtilisation(ArrayList<Exam> solution) {
         int numPeriodUtilisation = 0;
 
         for (int i = 0; i < solution.size(); i++) {
-            String exam = solution.get(i);
-            int period = Integer.parseInt(exam.substring(0, exam.indexOf(',')));
+            Exam exam = solution.get(i);
+            Period period = exam.getPeriod();
 
-            if (exams.get(i).getDuration() > periods.get(period).getDuration())
+            if (exam.getDuration() > period.getDuration())
                 numPeriodUtilisation++;
         }
 
         return numPeriodUtilisation;
     }
 
-    public int getNumPeriodRelated(ArrayList<String> solution) {
+    public int getNumPeriodRelated(ArrayList<Exam> solution) {
         int numPeriodRelated = 0;
 
         for (PeriodHardConstraint constraint : periodHardConstraints) {
             String type = constraint.getConstraint();
-            String exam1 = solution.get(constraint.getExam1());
-            String exam2 = solution.get(constraint.getExam2());
+            Exam exam1 = solution.get(constraint.getExam1());
+            Exam exam2 = solution.get(constraint.getExam2());
 
-            int period1 = getPeriod(exam1);
-            int period2 = getPeriod(exam2);
+            int period1 = exam1.getPeriod().getId();
+            int period2 = exam2.getPeriod().getId();
 
             switch (type) {
             case "AFTER":
@@ -250,14 +266,19 @@ class Problem {
         return numPeriodRelated;
     }
 
-    int getNumRoomRelated(ArrayList<String> solution) {
+    int getNumRoomRelated(ArrayList<Exam> solution) {
         int numRoomRelated = 0;
 
         for (RoomHardConstraint constraint : roomHardConstraints) {
-            String exam = solution.get(constraint.getExam());
+            int examId = constraint.getExam();
+            Exam exam = solution.get(examId);
+            int period1 = exam.getPeriod().getId();
+            int room1 = exam.getRoom().getId();
 
             for (int i = 0; i < solution.size(); i++) {
-                if (solution.get(i).equals(exam) && i != constraint.getExam())
+                int period2 = solution.get(i).getPeriod().getId();
+                int room2 = solution.get(i).getRoom().getId();
+                if (period1 == period2 && room1 == room2 && i != examId)
                     numRoomRelated++;
             }
         }
@@ -265,14 +286,15 @@ class Problem {
         return numRoomRelated;
     }
 
-    public ArrayList<String> getRandomSolution() {
-        ArrayList<String> solution = new ArrayList<String>();
+    public ArrayList<Exam> getRandomSolution() {
+        ArrayList<Exam> solution = new ArrayList<>(exams);
 
-        for (int i = 0; i < exams.size(); i++) {
+        for (Exam exam : solution) {
             int timeslot = randInt(0, periods.size());
             int room = randInt(0, rooms.size());
 
-            solution.add(timeslot + ", " + room);
+            exam.setPeriod(periods.get(timeslot));
+            exam.setRoom(rooms.get(room));
         }
 
         return solution;
@@ -287,5 +309,24 @@ class Problem {
         int randomNum = rand.nextInt((max - min)) + min;
 
         return randomNum;
+    }
+
+    public static void writeSolution(ArrayList<Exam> solution, String filename) throws IOException {
+        FileOutputStream fstream = null;
+
+        try {
+            fstream = new FileOutputStream(filename + ".sln");
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fstream));
+
+        for (Exam exam : solution) {
+            bw.write(exam + "\r\n");
+        }
+
+        bw.close();
     }
 }

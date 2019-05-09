@@ -16,14 +16,14 @@ public class Genetic {
 
     public static Problem problemInstance;
 
-    public static ArrayList<String> geneticSolve(Problem problem) {
+    public static ArrayList<Exam> geneticSolve(Problem problem) {
         exams = problem.getExams();
         periods = problem.getPeriods();
         rooms = problem.getRooms();
         problemInstance = problem;
 
-        ArrayList<ArrayList<String>> population = generatePopulation(problem);
-        ArrayList<String> bestSolution = getBestSolution(population);
+        ArrayList<ArrayList<Exam>> population = generatePopulation(problem);
+        ArrayList<Exam> bestSolution = getBestSolution(population);
 
         System.out.print("BEST FROM INITIAL POPULATION:  ");
         printSolution(bestSolution);
@@ -48,11 +48,11 @@ public class Genetic {
     }
 
     // COMPLETE
-    private static ArrayList<ArrayList<String>> generatePopulation(Problem problem) {
-        ArrayList<ArrayList<String>> population = new ArrayList<ArrayList<String>>();
+    private static ArrayList<ArrayList<Exam>> generatePopulation(Problem problem) {
+        ArrayList<ArrayList<Exam>> population = new ArrayList<ArrayList<Exam>>();
 
         for (int i = 0; i < POPULATION_SIZE; i++){
-            ArrayList<String> solution = problem.getRandomSolution();
+            ArrayList<Exam> solution = problem.getRandomSolution();
             population.add(solution);
         }
 
@@ -60,8 +60,8 @@ public class Genetic {
     }
 
     // COMPLETE
-    private static ArrayList<ArrayList<String>> getNextGeneration(ArrayList<ArrayList<String>> population){
-        ArrayList<ArrayList<String>> newGeneration = new ArrayList<ArrayList<String>>();
+    private static ArrayList<ArrayList<Exam>> getNextGeneration(ArrayList<ArrayList<Exam>> population){
+        ArrayList<ArrayList<Exam>> newGeneration = new ArrayList<ArrayList<Exam>>();
 
         if(ELITISM > 0) {
             Collections.sort(population, Comparator.comparing(s -> problemInstance.evaluate(s)));
@@ -71,10 +71,10 @@ public class Genetic {
         }
 
         for(int i = 0; i < POPULATION_SIZE - ELITISM; i++) {
-            ArrayList<String> individual1 = tournament(population);
-            ArrayList<String> individual2 = tournament(population);
-            ArrayList<String> child = crossover(individual1, individual2);
-            ArrayList<String> newChild = mutation(child);
+            ArrayList<Exam> individual1 = tournament(population);
+            ArrayList<Exam> individual2 = tournament(population);
+            ArrayList<Exam> child = crossover(individual1, individual2);
+            ArrayList<Exam> newChild = mutation(child);
             newGeneration.add(newChild);
         }
 
@@ -82,9 +82,9 @@ public class Genetic {
     }
 
     // COMPLETE
-    private static ArrayList<String> tournament(ArrayList<ArrayList<String>> population) {
+    private static ArrayList<Exam> tournament(ArrayList<ArrayList<Exam>> population) {
         Collections.shuffle(population);
-        ArrayList<ArrayList<String>> subPopulation = new ArrayList<ArrayList<String>>();
+        ArrayList<ArrayList<Exam>> subPopulation = new ArrayList<ArrayList<Exam>>();
 
         for(int i = 0; i < TOURNAMENT_SIZE; i++){
             subPopulation.add(population.get(i));
@@ -94,7 +94,7 @@ public class Genetic {
     }
 
     // TODO
-    private static ArrayList<String> mutation (ArrayList<String> solution) {
+    private static ArrayList<Exam> mutation (ArrayList<Exam> solution) {
         Random rand = new Random();
         Double p = rand.nextDouble();
         Boolean mutationTarget = false; // true for room, false for period
@@ -106,7 +106,7 @@ public class Genetic {
         p = rand.nextDouble();
 
         if(p < MUTATION_PROBABILITY){
-            ArrayList<String> newSolution = new ArrayList<String>(solution);
+            ArrayList<Exam> newSolution = new ArrayList<Exam>(solution);
             int index = rand.nextInt(exams.size());
 
             if(mutationTarget) {
@@ -127,8 +127,8 @@ public class Genetic {
     }
 
     // TODO: Return two solutions instead of one
-    private static ArrayList<String> crossover (ArrayList<String> solution1, ArrayList<String> solution2){
-        ArrayList<String> newSolution = new ArrayList<String>(solution1);
+    private static ArrayList<Exam> crossover (ArrayList<Exam> solution1, ArrayList<Exam> solution2){
+        ArrayList<Exam> newSolution = new ArrayList<Exam>(solution1);
 
         for(int i = 0; i < solution1.size(); i++) {
             if(i%2 == 0){
@@ -140,7 +140,7 @@ public class Genetic {
     }
 
     // COMPLETE
-    private static ArrayList<String> getBestSolution(ArrayList<ArrayList<String>> population) {
+    private static ArrayList<Exam> getBestSolution(ArrayList<ArrayList<Exam>> population) {
         int index = 0;
         int best = problemInstance.evaluate(population.get(0));
 
@@ -156,8 +156,8 @@ public class Genetic {
     }
 
     // TODO
-    private static void printSolution(ArrayList<String> solution) {
-        for(String i: solution) {
+    private static void printSolution(ArrayList<Exam> solution) {
+        for(Exam i : solution) {
             System.out.print(i + ", ");
         }
     }

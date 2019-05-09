@@ -1,10 +1,26 @@
 class Room {
     private int capacity;
     private int penalty;
+    private int id;
 
-    public Room(int capacity, int penalty) {
+    public Room(int id, int capacity, int penalty) {
+        this.setId(id);
         this.setCapacity(capacity);
         this.setPenalty(penalty);
+    }
+
+    /**
+     * @return the id
+     */
+    public int getId() {
+        return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    public void setId(int id) {
+        this.id = id;
     }
 
     /**

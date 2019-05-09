@@ -76,7 +76,7 @@ public class Reader {
             int duration = Integer.parseInt(values_raw[2]);
             int penalty = Integer.parseInt(values_raw[3]);
 
-            Period period = new Period(date, time, duration, penalty);
+            Period period = new Period(i, date, time, duration, penalty);
             periods.add(period);
         }
 
@@ -102,7 +102,7 @@ public class Reader {
             int capacity = Integer.parseInt(values_raw[0]);
             int penalty = Integer.parseInt(values_raw[1]);
 
-            Room room = new Room(capacity, penalty);
+            Room room = new Room(i, capacity, penalty);
 
             rooms.add(room);
         }

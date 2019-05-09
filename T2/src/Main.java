@@ -22,7 +22,7 @@ public class Main {
         try {
             String fileName = args[0];
             Problem problem = new Problem(fileName);
-            ArrayList<String> solution = new ArrayList<String>();
+            ArrayList<Exam> solution = new ArrayList<Exam>();
 
             switch (args[1]) {
             case "GENETIC":
@@ -32,37 +32,17 @@ public class Main {
                 solution = SimulatedAnnealing.solve(problem);
                 break;
             case "HILLCLIMB":
-                // solution = HillClimb.solve(problem);
+                solution = HillClimb.solve(problem);
                 break;
             default:
                 break;
             }
 
             System.out.println("Final value: " + problem.evaluate(solution, true));
-            writeSolution(solution, fileName.replaceFirst("[.][^.]+$", ""));
+            Problem.writeSolution(solution, fileName.replaceFirst("[.][^.]+$", ""));
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
-
-    public static void writeSolution(ArrayList<String> solution, String filename) throws IOException {
-        FileOutputStream fstream = null;
-
-        try {
-            fstream = new FileOutputStream(filename + ".sln");
-        } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fstream));
-
-        for (String exam : solution) {
-            bw.write(exam + "\r\n");
-        }
-
-        bw.close();
-    }
-
 }
