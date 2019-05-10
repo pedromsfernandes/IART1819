@@ -289,12 +289,16 @@ class Problem {
     public ArrayList<Exam> getRandomSolution() {
         ArrayList<Exam> solution = new ArrayList<>(exams);
 
-        for (Exam exam : solution) {
+        for (int i = 0; i < solution.size(); i++) {
+            Exam exam = solution.get(i);
+
             int timeslot = randInt(0, periods.size());
             int room = randInt(0, rooms.size());
 
-            exam.setPeriod(periods.get(timeslot));
-            exam.setRoom(rooms.get(room));
+            Exam newExam = new Exam(exam);
+            newExam.setPeriod(periods.get(timeslot));
+            newExam.setRoom(rooms.get(room));
+            solution.set(i, newExam);
         }
 
         return solution;

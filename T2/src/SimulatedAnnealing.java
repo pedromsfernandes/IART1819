@@ -12,47 +12,77 @@ class SimulatedAnnealing {
         return Math.exp((energy - newEnergy) / temperature);
     }
 
+    public static ArrayList<Exam> getNeighbourSolution(ArrayList<Exam> currentSolution, Problem problem) {
+        int rand = Problem.randInt(0, 2);
+
+        if (rand == 0)
+            return getNeighbourSolutionSwap(currentSolution, problem);
+
+        return getNeighbourSolutionStep(currentSolution, problem);
+    }
+
+    public static ArrayList<Exam> getNeighbourSolutionStep(ArrayList<Exam> currentSolution, Problem problem) {
+        int randInt = Problem.randInt(0, 2);
+        ArrayList<Exam> newSolution = new ArrayList<>(currentSolution);
+        int periods = problem.getPeriods().size();
+        int rooms = problem.getRooms().size();
+
+        for (int i = 0; i < newSolution.size(); i++) {
+            Exam exam = newSolution.get(i);
+            int periodId = exam.getPeriod().getId() + Problem.randInt(0, periods);
+            int roomId = exam.getRoom().getId() + Problem.randInt(0, rooms);
+
+            if (periodId >= periods) {
+                periodId -= periods;
+            }
+
+            if (roomId >= rooms) {
+                roomId -= rooms;
+            }
+
+            Exam newExam = new Exam(exam);
+
+            if (randInt == 0) {
+                Period newPeriod = problem.getPeriods().get(periodId);
+                newExam.setPeriod(newPeriod);
+
+            } else {
+                Room newRoom = problem.getRooms().get(roomId);
+                newExam.setRoom(newRoom);
+            }
+
+            newSolution.set(i, newExam);
+        }
+
+        return newSolution;
+    }
+
+    public static ArrayList<Exam> getNeighbourSolutionSwap(ArrayList<Exam> currentSolution, Problem problem) {
+        ArrayList<Exam> newSolution = new ArrayList<>(currentSolution);
+
+        int index1 = Problem.randInt(0, newSolution.size());
+        int index2 = Problem.randInt(0, newSolution.size());
+
+        Exam newExam1 = new Exam(newSolution.get(index1));
+        Exam newExam2 = new Exam(newSolution.get(index2));
+
+        newSolution.set(index1, newExam2);
+        newSolution.set(index2, newExam1);
+
+        return newSolution;
+    }
+
     public static ArrayList<Exam> solve(Problem problem) {
         double coolingRate = 0.003;
 
         ArrayList<Exam> currentSolution = new ArrayList<Exam>(problem.getRandomSolution());
-        System.out.println("initial: " + problem.evaluate(currentSolution, true));
         ArrayList<Exam> best = new ArrayList<Exam>(currentSolution);
+        int bestEnergy = problem.evaluate(best, true);
 
-        for (double temp = 1000; temp > 1; temp *= 1 - coolingRate) {
-            ArrayList<Exam> newSolution = new ArrayList<>(currentSolution);
+        int i = 0;
+        for (double temp = 100000; temp > 1; temp *= 1 - coolingRate, i++) {
 
-            int randInt = Problem.randInt(0, 2);
-            int index1 = (int) (Math.random() * newSolution.size());
-            int index2 = (int) (Math.random() * newSolution.size());
-
-            Exam exam1 = newSolution.get(index1);
-            Exam exam2 = newSolution.get(index2);
-
-            Period period1 = exam1.getPeriod();
-            Period period2 = exam2.getPeriod();
-
-            Room room1 = exam1.getRoom();
-            Room room2 = exam2.getRoom();
-
-            Exam newExam1 = new Exam(exam1); 
-            Exam newExam2 = new Exam(exam2); 
-
-            if(randInt == 0){
-
-                newExam1.setPeriod(period2);
-                newExam2.setPeriod(period1);
-                
-                newSolution.set(index1, newExam1);
-                newSolution.set(index2, newExam2);
-            }
-            else{
-                newExam1.setRoom(room2);
-                newExam2.setRoom(room1);
-                newSolution.set(index1, newExam1);
-                newSolution.set(index2, newExam2);
-            }
-
+            ArrayList<Exam> newSolution = new ArrayList<Exam>(getNeighbourSolution(currentSolution, problem));
             int currentEnergy = problem.evaluate(currentSolution, false);
             int neighbourEnergy = problem.evaluate(newSolution, false);
 
@@ -60,8 +90,14 @@ class SimulatedAnnealing {
                 currentSolution = new ArrayList<>(newSolution);
             }
 
-            if (problem.evaluate(currentSolution, false) < problem.evaluate(best, false)) {
+            if (problem.evaluate(currentSolution, false) < bestEnergy) {
                 best = new ArrayList<>(currentSolution);
+                bestEnergy = problem.evaluate(best, false);
+            }
+
+            if (i % 10000 == 0) {
+                currentSolution = new ArrayList<Exam>(problem.getRandomSolution());
+                temp = 100000;
             }
         }
 
