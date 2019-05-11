@@ -4,11 +4,11 @@ import java.util.Comparator;
 import java.util.Random;
 
 public class Genetic {
-    public static final Integer POPULATION_SIZE = 20;
-    public static final Integer TOURNAMENT_SIZE = 4;
+    public static final Integer POPULATION_SIZE = 50;
+    public static final Integer TOURNAMENT_SIZE = 20;
     public static final Double MUTATION_PROBABILITY = 0.9;
-    public static final Integer BEST_VALUE = 3;
-    public static final Integer ELITISM = 3;
+    public static final Integer BEST_VALUE = 100;
+    public static final Integer ELITISM = 5;
 
     public static ArrayList<Exam> exams = new ArrayList<>();
     public static ArrayList<Period> periods = new ArrayList<>();
@@ -35,6 +35,7 @@ public class Genetic {
             population = getNextGeneration(population);
             bestSolution = getBestSolution(population);
             generationCounter++;
+            System.out.println(generationCounter + " , BEST VALUE: " + problem.evaluate(bestSolution));
         }
 
         System.out.print("\nBEST FROM FINAL POPULATION:  ");
@@ -93,7 +94,7 @@ public class Genetic {
         return getBestSolution(subPopulation);
     }
 
-    // TODO
+    // COMPLETE
     private static ArrayList<Exam> mutation (ArrayList<Exam> solution) {
         Random rand = new Random();
         Double p = rand.nextDouble();
@@ -110,15 +111,25 @@ public class Genetic {
             int index = rand.nextInt(exams.size());
 
             if(mutationTarget) {
-                //TODO: MUTATE ROOM
-            } else {
-                // TODO: MUTATE PERIOD
-            }
+                int newRoomNr = rand.nextInt(rooms.size());
+                Exam targetElement = newSolution.get(index);
+                newSolution.remove(index);
 
-            /*
-            int mutatedGene = rand.nextInt(reader.numSlots) + 1;
-            newSolution.set(index, mutatedGene);
-             */
+                Room newRoom = rooms.get(newRoomNr);
+                targetElement.setRoom(newRoom);
+
+                newSolution.add(targetElement);
+            }
+            else {
+                int newPeriodNr = rand.nextInt(periods.size());
+                Exam targetElement = newSolution.get(index);
+                newSolution.remove(index);
+
+                Period newPeriod = periods.get(newPeriodNr);
+                targetElement.setPeriod(newPeriod);
+
+                newSolution.add(targetElement);
+            }
 
             return newSolution;
         }
@@ -126,7 +137,6 @@ public class Genetic {
         return solution;
     }
 
-    // TODO: Return two solutions instead of one
     private static ArrayList<Exam> crossover (ArrayList<Exam> solution1, ArrayList<Exam> solution2){
         ArrayList<Exam> newSolution = new ArrayList<Exam>(solution1);
 
@@ -155,10 +165,10 @@ public class Genetic {
         return population.get(index);
     }
 
-    // TODO
+    // COMPLETE
     private static void printSolution(ArrayList<Exam> solution) {
         for(Exam i : solution) {
-            System.out.print(i + ", ");
+            System.out.println(i.getRoom().getId() + ", " + i.getPeriod().getId());
         }
     }
 }
