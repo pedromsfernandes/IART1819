@@ -7,7 +7,7 @@ public class Genetic {
     public static final Integer POPULATION_SIZE = 50;
     public static final Integer TOURNAMENT_SIZE = 20;
     public static final Double MUTATION_PROBABILITY = 0.9;
-    public static final Integer BEST_VALUE = 100;
+    public static final Integer BEST_VALUE = 130;
     public static final Integer ELITISM = 5;
 
     public static ArrayList<Exam> exams = new ArrayList<>();
@@ -25,13 +25,14 @@ public class Genetic {
         ArrayList<ArrayList<Exam>> population = generatePopulation(problem);
         ArrayList<Exam> bestSolution = getBestSolution(population);
 
-        System.out.print("BEST FROM INITIAL POPULATION:  ");
-        printSolution(bestSolution);
+        System.out.println("BEST FROM INITIAL POPULATION");
+        //printSolution(bestSolution);
         System.out.println("\nVALUE: " + problem.evaluate(bestSolution));
 
         int generationCounter = 0;
 
-        while (problem.evaluate(bestSolution) > BEST_VALUE) {
+        //while (problem.evaluate(bestSolution) > BEST_VALUE) {
+          for(int i = 0; i < 5; i++){
             population = getNextGeneration(population);
             bestSolution = getBestSolution(population);
             generationCounter++;
@@ -40,7 +41,7 @@ public class Genetic {
 
         System.out.print("\nBEST FROM FINAL POPULATION:  ");
         bestSolution = getBestSolution(population);
-        printSolution(bestSolution);
+        //printSolution(bestSolution);
         System.out.println("\nVALUE: " + problem.evaluate(bestSolution));
 
         System.out.println("Number of generations: " + generationCounter);
@@ -61,34 +62,96 @@ public class Genetic {
     }
 
     // COMPLETE
-    private static ArrayList<ArrayList<Exam>> getNextGeneration(ArrayList<ArrayList<Exam>> population){
+    private static ArrayList<ArrayList<Exam>> getNextGeneration(ArrayList<ArrayList<Exam>> currentPopulation){
         ArrayList<ArrayList<Exam>> newGeneration = new ArrayList<ArrayList<Exam>>();
 
         if(ELITISM > 0) {
-            Collections.sort(population, Comparator.comparing(s -> problemInstance.evaluate(s)));
+            Collections.sort(currentPopulation, Comparator.comparing(s -> problemInstance.evaluate(s)));
+
+            System.out.println("ELITISM VALUES");
+            for (int i = 0; i < ELITISM; i++){
+                System.out.println(problemInstance.evaluate(currentPopulation.get(i)));
+            }
+
             for (int j = 0; j < ELITISM; j++) {
-                newGeneration.add(population.get(j));
+                newGeneration.add(currentPopulation.get(j));
+            }
+
+            System.out.println("NEW GENERATION VALUES AFTER INSERTING ELITISM");
+            for(int i = 0; i < ELITISM; i++){
+                System.out.println(problemInstance.evaluate(newGeneration.get(i)));
             }
         }
 
         for(int i = 0; i < POPULATION_SIZE - ELITISM; i++) {
-            ArrayList<Exam> individual1 = tournament(population);
-            ArrayList<Exam> individual2 = tournament(population);
+            ArrayList<Exam> individual1 = tournament(currentPopulation);
+            // TODO: TEST ------------
+            Collections.sort(newGeneration, Comparator.comparing(s -> problemInstance.evaluate(s)));
+            System.out.println("NEW GENERATION VALUES AFTER TOURNAMENT 1");
+            for(int j = 0; j < ELITISM; j++){
+                System.out.println(problemInstance.evaluate(newGeneration.get(i)));
+            }
+            // -----------------------
+
+
+            ArrayList<Exam> individual2 = tournament(currentPopulation);
+            // TODO: TEST ------------
+            Collections.sort(newGeneration, Comparator.comparing(s -> problemInstance.evaluate(s)));
+            System.out.println("NEW GENERATION VALUES AFTER TOURNAMENT 2");
+            for(int j = 0; j < ELITISM; j++){
+                System.out.println(problemInstance.evaluate(newGeneration.get(i)));
+            }
+            // -----------------------
+
+
             ArrayList<Exam> child = crossover(individual1, individual2);
+            // TODO: TEST ------------
+            Collections.sort(newGeneration, Comparator.comparing(s -> problemInstance.evaluate(s)));
+            System.out.println("NEW GENERATION VALUES AFTER CROSSOVER");
+            for(int j = 0; j < ELITISM; j++){
+                System.out.println(problemInstance.evaluate(newGeneration.get(i)));
+            }
+            // -----------------------
+
+
             ArrayList<Exam> newChild = mutation(child);
+            // TODO: TEST ------------
+            Collections.sort(newGeneration, Comparator.comparing(s -> problemInstance.evaluate(s)));
+            System.out.println("NEW GENERATION VALUES AFTER MUTATION");
+            for(int j = 0; j < ELITISM; j++){
+                System.out.println(problemInstance.evaluate(newGeneration.get(i)));
+            }
+            // -----------------------
             newGeneration.add(newChild);
+
+            // TODO: TEST ------------
+            Collections.sort(newGeneration, Comparator.comparing(s -> problemInstance.evaluate(s)));
+            System.out.println("NEW GENERATION VALUES AFTER INSERTING " + (i+1) + "ELEMENT");
+            for(int j = 0; j < ELITISM; j++){
+                System.out.println(problemInstance.evaluate(newGeneration.get(i)));
+            }
+            System.out.println();
+            // -----------------------
         }
+
+        // TODO: TEST ------------
+        Collections.sort(newGeneration, Comparator.comparing(s -> problemInstance.evaluate(s)));
+        System.out.println("NEW GENERATION VALUES AFTER INSERTING ALL OTHER ELEMENTS");
+        for(int i = 0; i < ELITISM; i++){
+            System.out.println(problemInstance.evaluate(newGeneration.get(i)));
+        }
+       // --------------------------
 
         return newGeneration;
     }
 
     // COMPLETE
-    private static ArrayList<Exam> tournament(ArrayList<ArrayList<Exam>> population) {
-        Collections.shuffle(population);
+    private static ArrayList<Exam> tournament(ArrayList<ArrayList<Exam>> tournamentPopulation) {
+        Collections.shuffle(tournamentPopulation);
         ArrayList<ArrayList<Exam>> subPopulation = new ArrayList<ArrayList<Exam>>();
 
         for(int i = 0; i < TOURNAMENT_SIZE; i++){
-            subPopulation.add(population.get(i));
+            subPopulation.add(tournamentPopulation.get(i));
         }
 
         return getBestSolution(subPopulation);
