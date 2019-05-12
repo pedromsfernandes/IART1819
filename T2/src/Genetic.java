@@ -4,11 +4,12 @@ import java.util.Comparator;
 import java.util.Random;
 
 public class Genetic {
-    public static final Integer POPULATION_SIZE = 50;
-    public static final Integer TOURNAMENT_SIZE = 20;
+    public static final Integer POPULATION_SIZE = 100;
+    public static final Integer TOURNAMENT_SIZE = 30;
     public static final Double MUTATION_PROBABILITY = 0.9;
-    public static final Integer BEST_VALUE = 130;
+    public static final Integer BEST_VALUE = 0;
     public static final Integer ELITISM = 5;
+    public static final Integer MAX_GENERATIONS = 40;
 
     public static ArrayList<Exam> exams = new ArrayList<>();
     public static ArrayList<Period> periods = new ArrayList<>();
@@ -26,13 +27,12 @@ public class Genetic {
         ArrayList<Exam> bestSolution = getBestSolution(population);
 
         System.out.println("BEST FROM INITIAL POPULATION");
-        //printSolution(bestSolution);
+        printSolution(bestSolution);
         System.out.println("\nVALUE: " + problem.evaluate(bestSolution));
 
         int generationCounter = 0;
 
-        //while (problem.evaluate(bestSolution) > BEST_VALUE) {
-          for(int i = 0; i < 5; i++){
+        while ((problem.evaluate(bestSolution) > BEST_VALUE) && (generationCounter < MAX_GENERATIONS)) {
             population = getNextGeneration(population);
             bestSolution = getBestSolution(population);
             generationCounter++;
@@ -41,7 +41,7 @@ public class Genetic {
 
         System.out.print("\nBEST FROM FINAL POPULATION:  ");
         bestSolution = getBestSolution(population);
-        //printSolution(bestSolution);
+        printSolution(bestSolution);
         System.out.println("\nVALUE: " + problem.evaluate(bestSolution));
 
         System.out.println("Number of generations: " + generationCounter);
@@ -75,14 +75,8 @@ public class Genetic {
 
         for(int i = 0; i < POPULATION_SIZE - ELITISM; i++) {
             ArrayList<Exam> individual1 = tournament(currentPopulation);
-
-
             ArrayList<Exam> individual2 = tournament(currentPopulation);
-
-
             ArrayList<Exam> child = crossover(individual1, individual2);
-
-
             ArrayList<Exam> newChild = mutation(child);
             newGeneration.add(newChild);
         }
@@ -177,7 +171,7 @@ public class Genetic {
     // COMPLETE
     private static void printSolution(ArrayList<Exam> solution) {
         for(Exam i : solution) {
-            System.out.println(i.getRoom().getId() + ", " + i.getPeriod().getId());
+            System.out.println(i.getPeriod().getId() + ", " + i.getRoom().getId());
         }
     }
 }
