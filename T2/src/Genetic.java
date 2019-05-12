@@ -68,90 +68,36 @@ public class Genetic {
         if(ELITISM > 0) {
             Collections.sort(currentPopulation, Comparator.comparing(s -> problemInstance.evaluate(s)));
 
-            System.out.println("ELITISM VALUES");
-            for (int i = 0; i < ELITISM; i++){
-                System.out.println(problemInstance.evaluate(currentPopulation.get(i)));
-            }
-
             for (int j = 0; j < ELITISM; j++) {
                 newGeneration.add(currentPopulation.get(j));
-            }
-
-            System.out.println("NEW GENERATION VALUES AFTER INSERTING ELITISM");
-            for(int i = 0; i < ELITISM; i++){
-                System.out.println(problemInstance.evaluate(newGeneration.get(i)));
             }
         }
 
         for(int i = 0; i < POPULATION_SIZE - ELITISM; i++) {
             ArrayList<Exam> individual1 = tournament(currentPopulation);
-            // TODO: TEST ------------
-            Collections.sort(newGeneration, Comparator.comparing(s -> problemInstance.evaluate(s)));
-            System.out.println("NEW GENERATION VALUES AFTER TOURNAMENT 1");
-            for(int j = 0; j < ELITISM; j++){
-                System.out.println(problemInstance.evaluate(newGeneration.get(i)));
-            }
-            // -----------------------
 
 
             ArrayList<Exam> individual2 = tournament(currentPopulation);
-            // TODO: TEST ------------
-            Collections.sort(newGeneration, Comparator.comparing(s -> problemInstance.evaluate(s)));
-            System.out.println("NEW GENERATION VALUES AFTER TOURNAMENT 2");
-            for(int j = 0; j < ELITISM; j++){
-                System.out.println(problemInstance.evaluate(newGeneration.get(i)));
-            }
-            // -----------------------
 
 
             ArrayList<Exam> child = crossover(individual1, individual2);
-            // TODO: TEST ------------
-            Collections.sort(newGeneration, Comparator.comparing(s -> problemInstance.evaluate(s)));
-            System.out.println("NEW GENERATION VALUES AFTER CROSSOVER");
-            for(int j = 0; j < ELITISM; j++){
-                System.out.println(problemInstance.evaluate(newGeneration.get(i)));
-            }
-            // -----------------------
 
 
             ArrayList<Exam> newChild = mutation(child);
-            // TODO: TEST ------------
-            Collections.sort(newGeneration, Comparator.comparing(s -> problemInstance.evaluate(s)));
-            System.out.println("NEW GENERATION VALUES AFTER MUTATION");
-            for(int j = 0; j < ELITISM; j++){
-                System.out.println(problemInstance.evaluate(newGeneration.get(i)));
-            }
-            // -----------------------
             newGeneration.add(newChild);
-
-            // TODO: TEST ------------
-            Collections.sort(newGeneration, Comparator.comparing(s -> problemInstance.evaluate(s)));
-            System.out.println("NEW GENERATION VALUES AFTER INSERTING " + (i+1) + "ELEMENT");
-            for(int j = 0; j < ELITISM; j++){
-                System.out.println(problemInstance.evaluate(newGeneration.get(i)));
-            }
-            System.out.println();
-            // -----------------------
         }
-
-        // TODO: TEST ------------
-        Collections.sort(newGeneration, Comparator.comparing(s -> problemInstance.evaluate(s)));
-        System.out.println("NEW GENERATION VALUES AFTER INSERTING ALL OTHER ELEMENTS");
-        for(int i = 0; i < ELITISM; i++){
-            System.out.println(problemInstance.evaluate(newGeneration.get(i)));
-        }
-       // --------------------------
 
         return newGeneration;
     }
 
     // COMPLETE
     private static ArrayList<Exam> tournament(ArrayList<ArrayList<Exam>> tournamentPopulation) {
-        Collections.shuffle(tournamentPopulation);
+        ArrayList<ArrayList<Exam>> copy = new ArrayList<ArrayList<Exam>>(tournamentPopulation);
+        Collections.shuffle(copy);
         ArrayList<ArrayList<Exam>> subPopulation = new ArrayList<ArrayList<Exam>>();
 
         for(int i = 0; i < TOURNAMENT_SIZE; i++){
-            subPopulation.add(tournamentPopulation.get(i));
+            subPopulation.add(new ArrayList<Exam>(copy.get(i)));
         }
 
         return getBestSolution(subPopulation);
@@ -175,7 +121,7 @@ public class Genetic {
 
             if(mutationTarget) {
                 int newRoomNr = rand.nextInt(rooms.size());
-                Exam targetElement = newSolution.get(index);
+                Exam targetElement = new Exam(newSolution.get(index));
                 newSolution.remove(index);
 
                 Room newRoom = rooms.get(newRoomNr);
@@ -185,7 +131,7 @@ public class Genetic {
             }
             else {
                 int newPeriodNr = rand.nextInt(periods.size());
-                Exam targetElement = newSolution.get(index);
+                Exam targetElement = new Exam(newSolution.get(index));
                 newSolution.remove(index);
 
                 Period newPeriod = periods.get(newPeriodNr);
@@ -225,7 +171,7 @@ public class Genetic {
             }
         }
 
-        return population.get(index);
+        return new ArrayList<Exam>(population.get(index));
     }
 
     // COMPLETE
