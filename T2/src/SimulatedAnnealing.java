@@ -88,11 +88,12 @@ class SimulatedAnnealing {
 
             if (acceptanceProbability(currentEnergy, neighbourEnergy, temp) > Math.random()) {
                 currentSolution = new ArrayList<>(newSolution);
+                currentEnergy = neighbourEnergy;
             }
 
-            if (problem.evaluate(currentSolution, false) < bestEnergy) {
+            if (currentEnergy < bestEnergy) {
                 best = new ArrayList<>(currentSolution);
-                bestEnergy = problem.evaluate(best, false);
+                bestEnergy = currentEnergy;
             }
 
             if (i % 10000 == 0) {
