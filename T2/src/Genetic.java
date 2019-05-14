@@ -8,7 +8,7 @@ public class Genetic {
     public static final Integer TOURNAMENT_SIZE = 10;
     public static final Double MUTATION_PROBABILITY = 0.9;
     public static final Integer BEST_VALUE = 0;
-    public static final Integer ELITISM = 5;
+    public static final Integer ELITISM = 2;
     public static final Integer MAX_GENERATIONS = 50;
 
     public static ArrayList<Exam> exams = new ArrayList<>();
@@ -28,7 +28,7 @@ public class Genetic {
 
         System.out.println("BEST FROM INITIAL POPULATION");
         printSolution(bestSolution);
-        System.out.println("\nVALUE: " + problem.evaluate(bestSolution));
+        System.out.println("\nPENALTY VALUE: " + problem.evaluate(bestSolution));
 
         int generationCounter = 0;
 
@@ -36,13 +36,12 @@ public class Genetic {
             population = getNextGeneration(population);
             bestSolution = getBestSolution(population);
             generationCounter++;
-            System.out.println(generationCounter + " , BEST VALUE: " + problem.evaluate(bestSolution));
+            System.out.println("GENERATION " + generationCounter + ", BEST SOLUTION PENALTY VALUE: " + problem.evaluate(bestSolution));
         }
 
         System.out.print("\nBEST FROM FINAL POPULATION:  ");
         bestSolution = getBestSolution(population);
         printSolution(bestSolution);
-        System.out.println("\nVALUE: " + problem.evaluate(bestSolution));
 
         System.out.println("Number of generations: " + generationCounter);
 
@@ -64,6 +63,7 @@ public class Genetic {
     // COMPLETE
     private static ArrayList<ArrayList<Exam>> getNextGeneration(ArrayList<ArrayList<Exam>> currentPopulation){
         ArrayList<ArrayList<Exam>> newGeneration = new ArrayList<ArrayList<Exam>>();
+        int generationSize = currentPopulation.size();
 
         if(ELITISM > 0) {
             Collections.sort(currentPopulation, Comparator.comparing(s -> problemInstance.evaluate(s)));
@@ -73,12 +73,14 @@ public class Genetic {
             }
         }
 
-        for(int i = 0; i < POPULATION_SIZE - ELITISM; i++) {
+        while(newGeneration.size() < generationSize) {
             ArrayList<Exam> individual1 = tournament(currentPopulation);
             ArrayList<Exam> individual2 = tournament(currentPopulation);
-            ArrayList<Exam> child = crossover(individual1, individual2);
-            ArrayList<Exam> newChild = mutation(child);
-            newGeneration.add(newChild);
+            ArrayList<ArrayList<Exam>> children = crossover(individual1, individual2);
+            ArrayList<Exam> newChild1 = mutation(children.get(0));
+            ArrayList<Exam> newChild2 = mutation(children.get(1));
+            newGeneration.add(newChild1);
+            newGeneration.add(newChild2);
         }
 
         return newGeneration;
@@ -140,16 +142,29 @@ public class Genetic {
         return solution;
     }
 
-    private static ArrayList<Exam> crossover (ArrayList<Exam> solution1, ArrayList<Exam> solution2){
-        ArrayList<Exam> newSolution = new ArrayList<Exam>(solution1);
+    private static ArrayList<ArrayList<Exam>> crossover (ArrayList<Exam> solution1, ArrayList<Exam> solution2){
+        ArrayList<ArrayList<Exam>> newSolutions = new ArrayList<ArrayList<Exam>>();
 
-        for(int i = 0; i < solution1.size(); i++) {
-            if(i%2 == 0){
-                newSolution.set(i, solution2.get(i));
-            }
+        Random rand = new Random();
+        int cutIndex = rand.nextInt((solution1.size() - 0) + 1);
+
+        ArrayList<Exam> newSolution1 = new ArrayList<>();
+        ArrayList<Exam> newSolution2 = new ArrayList<>();
+
+        for(int i = 0; i < cutIndex; i++) {
+            newSolution1.add(solution2.get(i));
+            newSolution2.add(solution1.get(i));
         }
 
-        return newSolution;
+        for (int i = cutIndex; i < solution1.size(); i++) {
+            newSolution1.add(solution1.get(i));
+            newSolution2.add(solution2.get(i));
+        }
+
+        newSolutions.add(newSolution1);
+        newSolutions.add(newSolution2);
+
+        return newSolutions;
     }
 
     // COMPLETE
