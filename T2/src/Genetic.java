@@ -9,7 +9,7 @@ public class Genetic {
     public static final Double MUTATION_PROBABILITY = 0.9;
     public static final Integer BEST_VALUE = 0;
     public static final Integer ELITISM = 2;
-    public static final Integer MAX_GENERATIONS = 50;
+    public static final Integer MAX_GENERATIONS = 350;
 
     public static ArrayList<Exam> exams = new ArrayList<>();
     public static ArrayList<Period> periods = new ArrayList<>();
@@ -36,7 +36,7 @@ public class Genetic {
             population = getNextGeneration(population);
             bestSolution = getBestSolution(population);
             generationCounter++;
-            System.out.println("GENERATION " + generationCounter + ", BEST SOLUTION PENALTY VALUE: " + problem.evaluate(bestSolution));
+            System.out.println("GENERATION " + generationCounter + ", BEST SOLUTION VALUE: " + problem.evaluate(bestSolution));
         }
 
         System.out.print("\nBEST FROM FINAL POPULATION:  ");
