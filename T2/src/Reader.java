@@ -11,11 +11,6 @@ public class Reader {
 
     public static Reader instance = new Reader();
 
-    // Project Variables ---------------------------------------
-
-    // ---------------------------------------------------------
-
-
     public void Reader(){}
 
     public static Reader getInstance() {
