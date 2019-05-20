@@ -43,6 +43,7 @@ public class Stats {
     private static final String APPLICATION_NAME = "Google Sheets API Java Quickstart";
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
+    public static final String spreadsheetId = "1gAnnrwxZvXVDLvXEUKtFiGTk1Om_h_c4dOgdsPKxv6Y";
 
     /**
      * Global instance of the scopes required by this quickstart. If modifying these
@@ -50,6 +51,8 @@ public class Stats {
      */
     private static final List<String> SCOPES = Collections.singletonList(SheetsScopes.SPREADSHEETS);
     private static final String CREDENTIALS_FILE_PATH = "/credentials.json";
+
+    public static int hillClimbIteration = 0;
 
     /**
      * Creates an authorized Credential object.
@@ -75,7 +78,7 @@ public class Stats {
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
     }
 
-    private static void saveStatsHillClimb(String valueRange, String timeRange, Sheets service, String spreadsheetId)
+    private static void saveStatsHillClimb(String valueRange, String timeRange, Sheets service)
             throws IOException {
         for (int i = 6; i < 7; i++) {
             Problem problem = new Problem("res/exam_comp_set" + i + ".exam");
@@ -112,7 +115,22 @@ public class Stats {
         }
     }
 
-    private static void saveStatsGenetic(Sheets service, String spreadsheetId) throws IOException {
+    public static void saveIterationHillClimb(List<List<Object>> values) throws IOException, GeneralSecurityException {
+        String range = "HILLCLIMB!G" + (Stats.hillClimbIteration + 3) + ":AP" + (Stats.hillClimbIteration + 3);
+
+        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+        Sheets service = new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+                .setApplicationName(APPLICATION_NAME).build();
+
+        ValueRange body = new ValueRange().setValues(values);
+        UpdateValuesResponse result = service.spreadsheets().values().update(spreadsheetId, range, body)
+                .setValueInputOption("RAW").execute();
+        System.out.printf("%d cells updated.", result.getUpdatedCells());
+
+        Stats.hillClimbIteration++;
+    }
+
+    private static void saveStatsGenetic(Sheets service) throws IOException {
         String valueRange = "GENETIC!E3:E9";
         String timeRange = "GENETIC!C3:C9";
 
@@ -126,10 +144,7 @@ public class Stats {
 
                 long startTime = System.currentTimeMillis();
 
-                if (valueRange.contains("HILLCLIMB"))
-                    solution = HillClimb.solve(problem);
-                else if (valueRange.contains("ANNEALING"))
-                    solution = SimulatedAnnealing.solve(problem);
+                solution = Genetic.geneticSolve(problem);
 
                 long stopTime = System.currentTimeMillis();
 
@@ -158,14 +173,12 @@ public class Stats {
     public static void main(String... args) throws IOException, GeneralSecurityException {
         // Build a new authorized API client service.
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-        final String spreadsheetId = "1gAnnrwxZvXVDLvXEUKtFiGTk1Om_h_c4dOgdsPKxv6Y";
         Sheets service = new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
                 .setApplicationName(APPLICATION_NAME).build();
 
-        saveStatsHillClimb("ANNEALING!E3:E9", "ANNEALING!C3:C9", service, spreadsheetId);
-        // saveStatsHillClimb("HILLCLIMB!E3:E9", "HILLCLIMB!C3:C9", service,
-        // spreadsheetId);
-        saveStatsGenetic(service, spreadsheetId);
+        //saveStatsHillClimb("ANNEALING!E3:E9", "ANNEALING!C3:C9", service);
+        saveStatsHillClimb("HILLCLIMB!E3:E9", "HILLCLIMB!C3:C9", service);
+        //saveStatsGenetic(service);
     }
 }
 // [END sheets_quickstart]
