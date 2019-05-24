@@ -1,16 +1,12 @@
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 class HillClimb {
 
     public static Problem problemStatic;
-
-    public static ArrayList<Exam> solve(Problem problem) {
+    
+    public static ArrayList<Exam> solve(Problem problem, boolean isSimpleVersion){
         problemStatic = problem;
-
+        
         ArrayList<Exam> current = new ArrayList<Exam>();
         ArrayList<Exam> neighbor = new ArrayList<Exam>();
         int bestScore = Integer.MAX_VALUE;
@@ -19,73 +15,30 @@ class HillClimb {
         currentScore = problem.evaluate(current);
 
         System.out.println("Start: " + currentScore);
+        long t= System.currentTimeMillis();
+        long end = t+15000;
 
-        while (true) {
-            neighbor = getBestNeighbor(current);
-            currentScore = problem.evaluate(neighbor);
-            System.out.println("Iteration: " + currentScore);
-
-            if (currentScore < bestScore) {
-                bestScore = currentScore;
-                current = cloneList(neighbor);
-            } else {
-                bestScore = currentScore;
-                current = cloneList(neighbor);
-                break;
-            }
-        }
-
-        //problem.evaluate(current,true);
-        return cloneList(current);
-    }
-
-    public static ArrayList<Exam> solveStats(Problem problem) {
-        problemStatic = problem;
-
-        ArrayList<Exam> current = new ArrayList<Exam>();
-        ArrayList<Exam> neighbor = new ArrayList<Exam>();
-        int bestScore = Integer.MAX_VALUE;
-        int currentScore;
-        current = problem.getRandomSolution();
-        currentScore = problem.evaluate(current);
-
-        ArrayList<List<Object>> values = new ArrayList<List<Object>>();
-        List<Object> row = new ArrayList<Object>();
-        System.out.println("Start: " + currentScore);
-
-        while (true) {
-            neighbor = getBestNeighbor(current);
+        while(System.currentTimeMillis() < end) {
+            
+            neighbor = getBestNeighbor(current,isSimpleVersion);
             currentScore = problem.evaluate(neighbor);
             System.out.println("Iteration: " + currentScore);
             
-            
-            row.add(currentScore);
-            
-            if (currentScore < bestScore) {
+            if(currentScore < bestScore){
                 bestScore = currentScore;
                 current = cloneList(neighbor);
-            } else {
+            }else{
                 bestScore = currentScore;
                 current = cloneList(neighbor);
-                break;
+                break;  
             }
-        }
-
-        values.add(row);
-
-        try {
-            Stats.saveIterationHillClimb(values);
-        } catch (IOException | GeneralSecurityException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         }
         
         //problem.evaluate(current,true);
         return cloneList(current);
     }
 
-
-    private static ArrayList<Exam> getBestNeighbor(ArrayList<Exam> current) {
+    private static ArrayList<Exam> getBestNeighbor(ArrayList<Exam> current, boolean returnFirst) {
         ArrayList<Exam> temp = new ArrayList<Exam>();
         ArrayList<Exam> solution = new ArrayList<Exam>();
         solution = cloneList(current);
@@ -112,6 +65,9 @@ class HillClimb {
                     bestScore = currentScore;
                     solution = cloneList(temp);
                     System.out.println("Change: " + currentScore);
+                    if(returnFirst){
+                        return solution;
+                    }
                 }
 
                 //2st Solution: Swap rooms
@@ -130,7 +86,12 @@ class HillClimb {
                 if(currentScore < bestScore){
                     bestScore = currentScore;
                     solution = cloneList(temp);
+                    
                     System.out.println("Change: " + currentScore);
+                    if(returnFirst){
+                        return solution;
+                    }
+                    
                 }
             }
         }
