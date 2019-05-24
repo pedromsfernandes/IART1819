@@ -1,4 +1,7 @@
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
+import java.util.List;
 
 class HillClimb {
 
@@ -32,6 +35,54 @@ class HillClimb {
                 current = cloneList(neighbor);
                 break;  
             }
+        }
+        
+        //problem.evaluate(current,true);
+        return cloneList(current);
+    }
+
+    public static ArrayList<Exam> solveStats(Problem problem, boolean isSimpleVersion) {
+        problemStatic = problem;
+
+        ArrayList<Exam> current = new ArrayList<Exam>();
+        ArrayList<Exam> neighbor = new ArrayList<Exam>();
+        int bestScore = Integer.MAX_VALUE;
+        int currentScore;
+        current = problem.getRandomSolution();
+        currentScore = problem.evaluate(current);
+
+        ArrayList<List<Object>> values = new ArrayList<List<Object>>();
+        List<Object> row = new ArrayList<Object>();
+        System.out.println("Start: " + currentScore);
+
+        long t= System.currentTimeMillis();
+        long end = t+15000;
+
+        while(System.currentTimeMillis() < end) {
+            neighbor = getBestNeighbor(current, isSimpleVersion);
+            currentScore = problem.evaluate(neighbor);
+            System.out.println("Iteration: " + currentScore);
+            
+            
+            row.add(currentScore);
+            
+            if (currentScore < bestScore) {
+                bestScore = currentScore;
+                current = cloneList(neighbor);
+            } else {
+                bestScore = currentScore;
+                current = cloneList(neighbor);
+                break;
+            }
+        }
+
+        values.add(row);
+
+        try {
+            Stats.saveIterationHillClimb(values, isSimpleVersion ? "HILLCLIMB_SIMPLE" : "HILLCLIMB_STEEPEST");
+        } catch (IOException | GeneralSecurityException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
         
         //problem.evaluate(current,true);

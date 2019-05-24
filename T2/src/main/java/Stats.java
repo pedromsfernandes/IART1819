@@ -53,6 +53,8 @@ public class Stats {
     private static final String CREDENTIALS_FILE_PATH = "/credentials.json";
 
     public static int hillClimbIteration = 0;
+    private static final int NUM_TRIALS = 2;
+    private static final int NUM_FILES = 13;
 
     /**
      * Creates an authorized Credential object.
@@ -78,20 +80,28 @@ public class Stats {
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
     }
 
-    private static void saveStatsHillClimb(String valueRange, String timeRange, Sheets service)
-            throws IOException {
-        for (int i = 6; i < 7; i++) {
+    private static void saveStatsHillClimb(String sheet, Sheets service) throws IOException {
+       
+        int start = 3;
+        int end = 4;
+
+        String valueRange = sheet + "!" + "E" + start + ":E" + end;
+        String timeRange = sheet + "!" + "C" +start + ":C" + end; 
+       
+        for (int i = 1; i < NUM_FILES; i++) {
             Problem problem = new Problem("res/exam_comp_set" + i + ".exam");
             ArrayList<List<Object>> times = new ArrayList<List<Object>>();
             ArrayList<List<Object>> values = new ArrayList<List<Object>>();
 
-            for (int j = 0; j < 2; j++) {
+            for (int j = 0; j < NUM_TRIALS; j++) {
                 ArrayList<Exam> solution = new ArrayList<Exam>();
 
                 long startTime = System.currentTimeMillis();
 
-                if (valueRange.contains("HILLCLIMB"))
-                    solution = HillClimb.solve(problem);
+                if (valueRange.contains("HILLCLIMB_STEEPEST"))
+                    solution = HillClimb.solve(problem, false);
+                else if (valueRange.contains("HILLCLIMB_SIMPLE"))
+                    solution = HillClimb.solve(problem, true);
                 else if (valueRange.contains("ANNEALING"))
                     solution = SimulatedAnnealing.solve(problem);
 
@@ -99,8 +109,9 @@ public class Stats {
 
                 int value = problem.evaluate(solution);
                 float elapsedTime = (stopTime - startTime) / 1000F;
+
                 times.add(Arrays.asList(elapsedTime));
-                values.add(Arrays.asList(value));
+                values.add(Arrays.asList(value));               
             }
 
             ValueRange body = new ValueRange().setValues(times);
@@ -112,11 +123,18 @@ public class Stats {
             result = service.spreadsheets().values().update(spreadsheetId, valueRange, body).setValueInputOption("RAW")
                     .execute();
             System.out.printf("%d cells updated.", result.getUpdatedCells());
+
+            start += 2;
+            end += 2;
+
+            valueRange = sheet + "!" + "E" + start + ":E" + end;
+            timeRange = sheet + "!" + "C" +start + ":C" + end; 
         }
     }
 
-    public static void saveIterationHillClimb(List<List<Object>> values) throws IOException, GeneralSecurityException {
-        String range = "HILLCLIMB!G" + (Stats.hillClimbIteration + 3) + ":AP" + (Stats.hillClimbIteration + 3);
+    public static void saveIterationHillClimb(List<List<Object>> values, String sheet)
+            throws IOException, GeneralSecurityException {
+        String range = sheet + "!G" + (Stats.hillClimbIteration + 3) + ":AP" + (Stats.hillClimbIteration + 3);
 
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         Sheets service = new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
@@ -131,15 +149,19 @@ public class Stats {
     }
 
     private static void saveStatsGenetic(Sheets service) throws IOException {
-        String valueRange = "GENETIC!E3:E9";
-        String timeRange = "GENETIC!C3:C9";
 
-        for (int i = 6; i < 7; i++) {
+        int start = 3;
+        int end = 4;
+
+        String valueRange = "GENETIC!" + "F" + start + ":F" + end;
+        String timeRange = "GENETIC!" + "D" +start + ":D" + end;
+
+        for (int i = 1; i < NUM_FILES; i++) {
             Problem problem = new Problem("res/exam_comp_set" + i + ".exam");
             ArrayList<List<Object>> times = new ArrayList<List<Object>>();
             ArrayList<List<Object>> values = new ArrayList<List<Object>>();
 
-            for (int j = 0; j < 2; j++) {
+            for (int j = 0; j < NUM_TRIALS; j++) {
                 ArrayList<Exam> solution = new ArrayList<Exam>();
 
                 long startTime = System.currentTimeMillis();
@@ -163,6 +185,11 @@ public class Stats {
             result = service.spreadsheets().values().update(spreadsheetId, valueRange, body).setValueInputOption("RAW")
                     .execute();
             System.out.printf("%d cells updated.", result.getUpdatedCells());
+
+            start += 2;
+            end += 2;
+            valueRange = "GENETIC!" + "F" + start + ":F" + end;
+            timeRange = "GENETIC!" + "D" +start + ":D" + end;
         }
     }
 
@@ -176,9 +203,10 @@ public class Stats {
         Sheets service = new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
                 .setApplicationName(APPLICATION_NAME).build();
 
-        //saveStatsHillClimb("ANNEALING!E3:E9", "ANNEALING!C3:C9", service);
-        saveStatsHillClimb("HILLCLIMB!E3:E9", "HILLCLIMB!C3:C9", service);
-        //saveStatsGenetic(service);
+        saveStatsHillClimb("ANNEALING", service);
+        saveStatsHillClimb("HILLCLIMB_SIMPLE", service);
+        saveStatsHillClimb("HILLCLIMB_STEEPEST", service);
+        saveStatsGenetic(service);
     }
 }
 // [END sheets_quickstart]
