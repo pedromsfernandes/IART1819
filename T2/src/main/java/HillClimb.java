@@ -19,7 +19,7 @@ class HillClimb {
 
         System.out.println("Start: " + currentScore);
         long t= System.currentTimeMillis();
-        long end = t+15000;
+        long end = t+90000;
 
         while(System.currentTimeMillis() < end) {
             
@@ -56,9 +56,9 @@ class HillClimb {
         System.out.println("Start: " + currentScore);
 
         long t= System.currentTimeMillis();
-        long end = t+15000;
+        long end = t+90000;
 
-        while(System.currentTimeMillis() < end) {
+        while(!Thread.interrupted()) {
             neighbor = getBestNeighbor(current, isSimpleVersion);
             currentScore = problem.evaluate(neighbor);
             System.out.println("Iteration: " + currentScore);

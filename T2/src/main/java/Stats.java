@@ -25,6 +25,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -81,37 +88,51 @@ public class Stats {
     }
 
     private static void saveStatsHillClimb(String sheet, Sheets service) throws IOException {
-       
+
         int start = 3;
         int end = 4;
 
         String valueRange = sheet + "!" + "E" + start + ":E" + end;
-        String timeRange = sheet + "!" + "C" +start + ":C" + end; 
-       
+        String timeRange = sheet + "!" + "C" + start + ":C" + end;
+
         for (int i = 1; i <= NUM_FILES; i++) {
             Problem problem = new Problem("res/exam_comp_set" + i + ".exam");
             ArrayList<List<Object>> times = new ArrayList<List<Object>>();
             ArrayList<List<Object>> values = new ArrayList<List<Object>>();
 
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+
             for (int j = 0; j < NUM_TRIALS; j++) {
                 ArrayList<Exam> solution = new ArrayList<Exam>();
 
                 long startTime = System.currentTimeMillis();
+                Future<ArrayList<Exam>> future = executor.submit(new Task(sheet, problem));
 
-                if (valueRange.contains("HILLCLIMB_STEEPEST"))
-                    solution = HillClimb.solve(problem, false);
-                else if (valueRange.contains("HILLCLIMB_SIMPLE"))
-                    solution = HillClimb.solve(problem, true);
-                else if (valueRange.contains("ANNEALING"))
-                    solution = SimulatedAnnealing.solve(problem);
+                try {
+                    System.out.println("Started..");
+                    solution = future.get(90, TimeUnit.SECONDS);
+                    System.out.println("Finished!");
+                } catch (TimeoutException | InterruptedException | ExecutionException e) {
+                    future.cancel(true);
+                    System.out.println("Terminated!");
+                }
 
                 long stopTime = System.currentTimeMillis();
 
-                int value = problem.evaluate(solution);
-                float elapsedTime = (stopTime - startTime) / 1000F;
+                if(solution.size() == 0){
+                        
+                    times.add(Arrays.asList("TIMEOUT"));
+                    values.add(Arrays.asList("TIMEOUT"));
+                }
 
-                times.add(Arrays.asList(elapsedTime));
-                values.add(Arrays.asList(value));               
+                else{
+                    int value = problem.evaluate(solution);
+                    float elapsedTime = (stopTime - startTime) / 1000F;
+    
+                    times.add(Arrays.asList(elapsedTime));
+                    values.add(Arrays.asList(value));
+                }
+
             }
 
             ValueRange body = new ValueRange().setValues(times);
@@ -128,13 +149,13 @@ public class Stats {
             end += 2;
 
             valueRange = sheet + "!" + "E" + start + ":E" + end;
-            timeRange = sheet + "!" + "C" +start + ":C" + end; 
+            timeRange = sheet + "!" + "C" + start + ":C" + end;
         }
     }
 
     public static void saveIterationHillClimb(List<List<Object>> values, String sheet)
             throws IOException, GeneralSecurityException {
-        String range = sheet + "!G" + (Stats.hillClimbIteration + 3) + ":AP" + (Stats.hillClimbIteration + 3);
+        String range = sheet + "!G" + (Stats.hillClimbIteration + 3) + ":ZP" + (Stats.hillClimbIteration + 3);
 
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         Sheets service = new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
@@ -154,7 +175,7 @@ public class Stats {
         int end = 4;
 
         String valueRange = "GENETIC!" + "F" + start + ":F" + end;
-        String timeRange = "GENETIC!" + "D" +start + ":D" + end;
+        String timeRange = "GENETIC!" + "D" + start + ":D" + end;
 
         for (int i = 1; i <= NUM_FILES; i++) {
             Problem problem = new Problem("res/exam_comp_set" + i + ".exam");
@@ -189,7 +210,7 @@ public class Stats {
             start += 2;
             end += 2;
             valueRange = "GENETIC!" + "F" + start + ":F" + end;
-            timeRange = "GENETIC!" + "D" +start + ":D" + end;
+            timeRange = "GENETIC!" + "D" + start + ":D" + end;
         }
     }
 
@@ -203,29 +224,49 @@ public class Stats {
         Sheets service = new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
                 .setApplicationName(APPLICATION_NAME).build();
 
-
-        if(args.length == 0){
+        if (args.length == 0) {
             saveStatsHillClimb("ANNEALING", service);
             saveStatsHillClimb("HILLCLIMB_SIMPLE", service);
             saveStatsHillClimb("HILLCLIMB_STEEPEST", service);
             saveStatsGenetic(service);
-        }
-        else {
-            switch(args[0]){
-                case "ANNEALING":
-                    saveStatsHillClimb("ANNEALING", service);
+        } else {
+            switch (args[0]) {
+            case "ANNEALING":
+                saveStatsHillClimb("ANNEALING", service);
                 break;
-                case "HILLCLIMB_SIMPLE":
-                    saveStatsHillClimb("HILLCLIMB_SIMPLE", service);
+            case "HILLCLIMB_SIMPLE":
+                saveStatsHillClimb("HILLCLIMB_SIMPLE", service);
                 break;
-                case "HILLCLIMB_STEEPEST":
-                    saveStatsHillClimb("HILLCLIMB_STEEPEST", service);
+            case "HILLCLIMB_STEEPEST":
+                saveStatsHillClimb("HILLCLIMB_STEEPEST", service);
                 break;
-                case "GENETIC":
-                    saveStatsGenetic(service);
+            case "GENETIC":
+                saveStatsGenetic(service);
                 break;
             }
-        }        
+        }
     }
 }
+
+class Task implements Callable<ArrayList<Exam>> {
+
+    private String sheet;
+    private Problem problem;
+
+    public Task(String sheet, Problem problem){
+        this.sheet = sheet;
+        this.problem = problem;
+    }
+
+    @Override
+    public ArrayList<Exam> call() throws Exception {
+        if (sheet.equals("HILLCLIMB_STEEPEST"))
+            return HillClimb.solveStats(problem, false);
+        else if (sheet.equals("HILLCLIMB_SIMPLE"))
+            return HillClimb.solveStats(problem, true);
+        else
+            return SimulatedAnnealing.solve(problem);
+    }
+}
+
 // [END sheets_quickstart]
