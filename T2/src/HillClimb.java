@@ -15,8 +15,10 @@ class HillClimb {
         currentScore = problem.evaluate(current);
 
         System.out.println("Start: " + currentScore);
+        long t= System.currentTimeMillis();
+        long end = t+15000;
 
-        while(true) {
+        while(System.currentTimeMillis() < end) {
             
             neighbor = getBestNeighbor(current,isSimpleVersion);
             currentScore = problem.evaluate(neighbor);
