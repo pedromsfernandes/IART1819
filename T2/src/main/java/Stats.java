@@ -88,7 +88,7 @@ public class Stats {
         String valueRange = sheet + "!" + "E" + start + ":E" + end;
         String timeRange = sheet + "!" + "C" +start + ":C" + end; 
        
-        for (int i = 1; i < NUM_FILES; i++) {
+        for (int i = 1; i <= NUM_FILES; i++) {
             Problem problem = new Problem("res/exam_comp_set" + i + ".exam");
             ArrayList<List<Object>> times = new ArrayList<List<Object>>();
             ArrayList<List<Object>> values = new ArrayList<List<Object>>();
@@ -156,7 +156,7 @@ public class Stats {
         String valueRange = "GENETIC!" + "F" + start + ":F" + end;
         String timeRange = "GENETIC!" + "D" +start + ":D" + end;
 
-        for (int i = 1; i < NUM_FILES; i++) {
+        for (int i = 1; i <= NUM_FILES; i++) {
             Problem problem = new Problem("res/exam_comp_set" + i + ".exam");
             ArrayList<List<Object>> times = new ArrayList<List<Object>>();
             ArrayList<List<Object>> values = new ArrayList<List<Object>>();
@@ -203,10 +203,29 @@ public class Stats {
         Sheets service = new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
                 .setApplicationName(APPLICATION_NAME).build();
 
-        saveStatsHillClimb("ANNEALING", service);
-        saveStatsHillClimb("HILLCLIMB_SIMPLE", service);
-        saveStatsHillClimb("HILLCLIMB_STEEPEST", service);
-        saveStatsGenetic(service);
+
+        if(args.length == 0){
+            saveStatsHillClimb("ANNEALING", service);
+            saveStatsHillClimb("HILLCLIMB_SIMPLE", service);
+            saveStatsHillClimb("HILLCLIMB_STEEPEST", service);
+            saveStatsGenetic(service);
+        }
+        else {
+            switch(args[0]){
+                case "ANNEALING":
+                    saveStatsHillClimb("ANNEALING", service);
+                break;
+                case "HILLCLIMB_SIMPLE":
+                    saveStatsHillClimb("HILLCLIMB_SIMPLE", service);
+                break;
+                case "HILLCLIMB_STEEPEST":
+                    saveStatsHillClimb("HILLCLIMB_STEEPEST", service);
+                break;
+                case "GENETIC":
+                    saveStatsGenetic(service);
+                break;
+            }
+        }        
     }
 }
 // [END sheets_quickstart]
