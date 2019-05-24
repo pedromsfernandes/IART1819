@@ -16,6 +16,11 @@ public class Main {
         ArrayList<String> algorithms = new ArrayList<String>(
                 Arrays.asList("GENETIC", "HILLCLIMB_SIMPLE", "HILLCLIMB_STEEPEST", "ANNEALING"));
 
+        if(args.length == 0) {
+            usage();
+            return;
+        }
+                
         if (args[0].equals("STATS")) {
             if (args.length == 2 && !algorithms.contains(args[1])) {
                 usage();
