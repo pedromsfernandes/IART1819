@@ -63,6 +63,22 @@ public class Stats {
     private static final int NUM_TRIALS = 2;
     private static final int NUM_FILES = 13;
 
+    private NetHttpTransport HTTP_TRANSPORT;
+    private Sheets service;
+
+    public Stats() {
+        try {
+            HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+
+            service = new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+                    .setApplicationName(APPLICATION_NAME).build();
+
+        } catch (IOException | GeneralSecurityException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Creates an authorized Credential object.
      * 
@@ -87,7 +103,7 @@ public class Stats {
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
     }
 
-    private static void saveStatsHillClimb(String sheet, Sheets service) throws IOException {
+    public void saveStatsHillClimb(String sheet) throws IOException {
 
         int start = 3;
         int end = 4;
@@ -119,16 +135,16 @@ public class Stats {
 
                 long stopTime = System.currentTimeMillis();
 
-                if(solution.size() == 0){
-                        
+                if (solution.size() == 0) {
+
                     times.add(Arrays.asList("TIMEOUT"));
                     values.add(Arrays.asList("TIMEOUT"));
                 }
 
-                else{
+                else {
                     int value = problem.evaluate(solution);
                     float elapsedTime = (stopTime - startTime) / 1000F;
-    
+
                     times.add(Arrays.asList(elapsedTime));
                     values.add(Arrays.asList(value));
                 }
@@ -151,7 +167,7 @@ public class Stats {
             valueRange = sheet + "!" + "E" + start + ":E" + end;
             timeRange = sheet + "!" + "C" + start + ":C" + end;
         }
-    }
+    } 
 
     public static void saveIterationHillClimb(List<List<Object>> values, String sheet)
             throws IOException, GeneralSecurityException {
@@ -169,7 +185,7 @@ public class Stats {
         Stats.hillClimbIteration++;
     }
 
-    private static void saveStatsGenetic(Sheets service) throws IOException {
+    public void saveStatsGenetic() throws IOException {
 
         int start = 3;
         int end = 4;
@@ -213,39 +229,6 @@ public class Stats {
             timeRange = "GENETIC!" + "D" + start + ":D" + end;
         }
     }
-
-    /**
-     * Prints the names and majors of students in a sample spreadsheet:
-     * https://docs.google.com/spreadsheets/d/1gAnnrwxZvXVDLvXEUKtFiGTk1Om_h_c4dOgdsPKxv6Y/edit
-     */
-    public static void main(String... args) throws IOException, GeneralSecurityException {
-        // Build a new authorized API client service.
-        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-        Sheets service = new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
-                .setApplicationName(APPLICATION_NAME).build();
-
-        if (args.length == 0) {
-            saveStatsHillClimb("ANNEALING", service);
-            saveStatsHillClimb("HILLCLIMB_SIMPLE", service);
-            saveStatsHillClimb("HILLCLIMB_STEEPEST", service);
-            saveStatsGenetic(service);
-        } else {
-            switch (args[0]) {
-            case "ANNEALING":
-                saveStatsHillClimb("ANNEALING", service);
-                break;
-            case "HILLCLIMB_SIMPLE":
-                saveStatsHillClimb("HILLCLIMB_SIMPLE", service);
-                break;
-            case "HILLCLIMB_STEEPEST":
-                saveStatsHillClimb("HILLCLIMB_STEEPEST", service);
-                break;
-            case "GENETIC":
-                saveStatsGenetic(service);
-                break;
-            }
-        }
-    }
 }
 
 class Task implements Callable<ArrayList<Exam>> {
@@ -253,7 +236,7 @@ class Task implements Callable<ArrayList<Exam>> {
     private String sheet;
     private Problem problem;
 
-    public Task(String sheet, Problem problem){
+    public Task(String sheet, Problem problem) {
         this.sheet = sheet;
         this.problem = problem;
     }

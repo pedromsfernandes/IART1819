@@ -1,15 +1,12 @@
 COMPILAR
 
-cd src/main/java
-javac *.java
+É feito automaticamente ao correr o programa.
 
 CORRER
 
-java Main # sem argumentos retorna usage
-
-Usage: java Main <FILENAME> <ALGORITHM>
+Usage: gradle run --args="<FILENAME> <ALGORITHM>"
 Where ALGORITHM can be one of the following: GENETIC, HILLCLIMB_SIMPLE, HILLCLIMB_STEEPEST or ANNEALING
-Example: java Main ../res/exam_comp_set1.exam GENETIC
+Example: gradle run --args="res/exam_comp_set1.exam GENETIC"
 
 UTILIZAR
 
