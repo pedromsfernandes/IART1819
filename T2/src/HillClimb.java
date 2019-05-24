@@ -4,7 +4,7 @@ class HillClimb {
 
     public static Problem problemStatic;
     
-    public static ArrayList<Exam> solve(Problem problem){
+    public static ArrayList<Exam> solve(Problem problem, boolean isSimpleVersion){
         problemStatic = problem;
         
         ArrayList<Exam> current = new ArrayList<Exam>();
@@ -17,7 +17,8 @@ class HillClimb {
         System.out.println("Start: " + currentScore);
 
         while(true) {
-            neighbor = getBestNeighbor(current);
+            
+            neighbor = getBestNeighbor(current,isSimpleVersion);
             currentScore = problem.evaluate(neighbor);
             System.out.println("Iteration: " + currentScore);
             
@@ -27,7 +28,7 @@ class HillClimb {
             }else{
                 bestScore = currentScore;
                 current = cloneList(neighbor);
-                break;
+                break;  
             }
         }
         
@@ -35,7 +36,7 @@ class HillClimb {
         return cloneList(current);
     }
 
-    private static ArrayList<Exam> getBestNeighbor(ArrayList<Exam> current) {
+    private static ArrayList<Exam> getBestNeighbor(ArrayList<Exam> current, boolean returnFirst) {
         ArrayList<Exam> temp = new ArrayList<Exam>();
         ArrayList<Exam> solution = new ArrayList<Exam>();
         solution = cloneList(current);
@@ -62,6 +63,9 @@ class HillClimb {
                     bestScore = currentScore;
                     solution = cloneList(temp);
                     System.out.println("Change: " + currentScore);
+                    if(returnFirst){
+                        return solution;
+                    }
                 }
 
                 //2st Solution: Swap rooms
@@ -80,7 +84,12 @@ class HillClimb {
                 if(currentScore < bestScore){
                     bestScore = currentScore;
                     solution = cloneList(temp);
+                    
                     System.out.println("Change: " + currentScore);
+                    if(returnFirst){
+                        return solution;
+                    }
+                    
                 }
             }
         }
